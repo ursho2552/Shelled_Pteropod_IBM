@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Hofmann Elizondo"
+  given-names: "Urs"
+- family-names: "Vogt"
+  given-names: "Meike"
+title: "Shelled Pteropod IBM"
+version: 0.0.1
+date-released: 2022-03-10
+url: "https://github.com/ShelledPteropodIBM/spIBM"

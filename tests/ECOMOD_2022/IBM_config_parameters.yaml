@@ -1,0 +1,96 @@
+# IBM_config_paths.yaml file
+
+#Created on Thu Mar  3 14:15:12 2022
+
+#author: ursho
+
+data_path: "/nfs/kryo/work/ursho/PhD/Projects/Pteropods/Parcels/Environmental_data/Roms_data/"
+mesh_file: "/nfs/kryo/work/fdesmet/roms/input/pactcs30/pactcs30_grd.nc"
+ 
+directory_mort: "/nfs/kryo/work/ursho/PhD/Projects/Pteropod_IBM/Analysis/Calibration/Mortality/Results/" #this should not be here
+similarity_file: "Similarity_to_MAREDAT_V25_Part_{}.csv"#this should not be here
+ 
+output_dir_initialization: "/home/ursho/PhD/Projects/Pteropod_IBM/Analysis/output_initialization_Test/"
+gen0_file: "Gen0.csv"
+gen1_file: "Gen1.csv"
+out_ptero_file: "/Pteropods_Day_{}.csv"
+initial_positions_file: "Initial_positions.csv"
+
+reference_abundance_data: "/cluster/home/ursho/kryo_work/ursho/PhD/Projects/Pteropod_IBM/Data/MarEDat20120203Pteropods.nc"
+
+output_dir_physics: "/nfs/kryo/work/ursho/PhD/Projects/Pteropod_IBM/Analysis/output_physics_only_test/"
+physics_only_file: "JitPtero_year_init_Day_{}.nc"
+ 
+output_dir_simulation_scratch: "/cluster/scratch/ursho/Pteropod_IBM/output/netcdf/"
+outfile_mort_scratch: "/cluster/scratch/ursho/Pteropod_IBM/output/mortalities/"
+outfile_growth_scratch: "/cluster/scratch/ursho/Pteropod_IBM/output/Growth/"
+output_tables_scratch:  "/cluster/scratch/ursho/Pteropod_IBM/output/tables/"
+
+output_dir_simulation: "/home/ursho/PhD/Projects/Pteropod_IBM/Analysis/Pteropod_Areareseed/output/netcdf/"
+outfile_mort: "/home/ursho/PhD/Projects/Pteropod_IBM/Analysis/Pteropod_Areareseed/output/mortalities/"
+outfile_growth: "/home/ursho/PhD/Projects/Pteropod_IBM/Analysis/Pteropod_Areareseed/output/Growth/"
+output_tables:  "/home/ursho/PhD/Projects/Pteropod_IBM/Analysis/Pteropod_Areareseed/output/tables/"
+
+dir_env: "/nfs/kryo/work/ursho/PhD/Projects/Pteropod_IBM/Data/"
+sst_file: "daily_sst.csv"
+food_file: "daily_food.csv"
+
+
+
+velocity_file: "Velocities/time_nco_velocities_pactcs30_{}_avg.nc"
+aragonite_file: "Aragonite/nco_aragonite_pactcs30_{}_avg.nc"
+extreme_file: "Aragonite/250m/control_aragonite_pactcs30_{}_avg.nc"
+oxygen_file: "Oxygen/nco_oxygen_pactcs30_{}_avg.nc"
+temperature_file: "Temperature/nco_temp_pactcs30_{}_avg.nc"
+chlorophyll_file: "Chlorophyll/nco_chlorophyll_pactcs30_{}_avg.nc"
+depth_file: "Velocities/depth_z_pos.nc"
+unbeach_file: "Velocities/UnBeachVel_Comb.nc"
+mask_file: "Velocities/UnBeachVel_Comb.nc"
+
+
+velocity_U_variable_name: "u"
+velocity_V_variable_name: "v"
+velocity_W_variable_name: "w"
+aragonite_variable_name: "omega_arag_offl"
+extreme_variable_name: "Extremes"
+temperature_variable_name: "temp"
+oxygen_variable_name: "O2"
+chlorophyll_variable_name: "TOT_CHL"
+depth_variable_name: "depth_Z_r"
+mask_variable_name: "mask_comb"
+unbeach_lat_variable_name: "unBeach_lat"
+unbeach_lon_variable_name: "unBeach_lon"
+
+lon_name: "lon_psi"
+lat_name: "lat_psi"
+depth_name: "depth_Z_w"
+time_name: "time_counter"
+
+
+#class BooleanFlags:
+flag_calculate_initial_population: False
+flag_calculate_initial_positions: True
+flag_run_physics_only: True
+    
+#class ModelParameters:
+#control and version should not be here
+control: None
+start_year: 1984
+version: None
+start_day: None
+num_init: None
+day_start_initial_eggs: 120
+seed: 3
+rateG00: 0.1
+rateG01: 0.075
+rateG02: 0.01
+rateG03: 0.075
+rateG10: 0.45
+rateG11: 0.01
+rateG12: 0.01
+rateG13: 0.01
+num_eggs: 500
+delta_ERR: 20
+Ks: 0.418
+T0: 14.5
+Tmax: 18.0
