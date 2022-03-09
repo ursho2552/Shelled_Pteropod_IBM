@@ -17,9 +17,9 @@ setup(name="spIBM-ursho",
     description="Code for the shelled pteropod Individual-Based Model (IBM)",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/pypa/sampleproject",
+    url="https://github.com/ursho2552/Shelled_Pteropod_IBM",
     project_urls={
-        "Bug Tracker": "https://github.com/pypa/sampleproject/issues",
+        "Bug Tracker": "https://github.com/ursho2552/Shelled_Pteropod_IBM/issues",
     },
     classifiers=[
         "Programming Language :: Python :: 3",
