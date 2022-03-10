@@ -18,7 +18,17 @@ import datetime
     
 
 def run_IBM_idealized(Config_param,my_pteropods,start_gen=0,time=5000,L_t=None,save_population=False,save_abundance=False):
-    
+    """This function runs the shelled pteropod IBM using idealized conditions and without advection and DVM.
+        
+    Keyword arguments: 
+    Config_param -- dataclass object containing the paths for idealized environmental conditions, and model parameters
+    my_pteropods -- initial pteropod population
+    start_gen -- generation of the initial pteropod population (default: 0)
+    time -- number of days to run the IBM (default: 5000)
+    L_t -- size of the pteropod (in mm) as a function of time (default: None). For the default value we use the growth function from Wang et al. 2017
+    save_population -- boolean flag indicating if the pteropod population of each simulation day should be saved (default: False)
+    save_abundance -- boolean flag indicating if the abundance time series should be saved at the end of the simulation (default: False)
+    """
     sst_file = Config_param.dir_env+Config_param.sst_file
     food_file = Config_param.dir_env+Config_param.food_file
 
@@ -129,7 +139,20 @@ def run_IBM_idealized(Config_param,my_pteropods,start_gen=0,time=5000,L_t=None,s
         return
 
 
-def run_IBM_coupled(Config_param, pset_ptero, fieldset, pclass, kernels, time_mat,next_ID, current_gen, L_t=None):
+def run_IBM_coupled(Config_param, pset, fieldset, pclass, kernels, time_mat,next_ID, current_gen, L_t=None):
+    """This function runs the shelled pteropod IBM using modeled/observed environmental conditions and with a defined kernel for movement and interation with the environment.
+        
+    Keyword arguments: 
+    Config_param -- dataclass object containing the paths for idealized environmental conditions, and model parameters
+    pset -- Ocean Parcels particle object containing the initial population with initialized attributes
+    fieldset -- Ocean Parcels fieldset object defining the environmental conditions
+    pclass -- Ocean Parcels particle class
+    kernels -- Ocean Parcels kernel. Defines how the particels move and interact with the environment
+    time_mat -- array containing the year on the first row, the day on the second row, and the number of days after the beginning of the simulation period
+    next_ID -- the unique identifier for the next ID
+    current_gen -- identifier for the current generation
+    L_t -- size of the pteropod (in mm) as a function of time (default: None). For the default value we use the growth function from Wang et al. 2017
+    """
 
     #spring generation
     rate_g0_0 = Config_param.rateG00
@@ -174,23 +197,21 @@ def run_IBM_coupled(Config_param, pset_ptero, fieldset, pclass, kernels, time_ma
             os.makedirs(output_dir)
         filename_day = output_dir+"JitPtero_Day_{}".format(day_counter)
         if flag_init == 1:
-#            print('Initialization of particles...')
             tbar.set_description('Initializing for the first time')
             tbar.refresh
-            pset_ptero = coupler_module.prepare_particles(pset_ptero,fieldset,year)
+            pset = coupler_module.prepare_particles(pset,fieldset,year)
             flag_init = 0
         
-#        print('Advection module running...')
         tbar.set_description(f'Day {day_counter}: Advection')
         tbar.refresh
         
-        pset_ptero.execute(kernels,runtime=datetime.timedelta(days=1),dt=datetime.timedelta(hours=1.0),\
-                output_file=pset_ptero.ParticleFile(name=filename_day, outputdt=datetime.timedelta(hours=1.0)),\
+        pset.execute(kernels,runtime=datetime.timedelta(days=1),dt=datetime.timedelta(hours=1.0),\
+                output_file=pset.ParticleFile(name=filename_day, outputdt=datetime.timedelta(hours=1.0)),\
                 verbose_progress=False,recovery={ErrorCode.ErrorThroughSurface: parcels_module.ReturnToSurface,ErrorCode.ErrorOutOfBounds: parcels_module.PushToWater})
         
         tbar.set_description(f'Day {day_counter}: Mortality')
         tbar.refresh
-        my_data = coupler_module.convert_to_mat(pset_ptero,i)
+        my_data = coupler_module.convert_to_mat(pset,i)
         
         day_vec = np.array([year,Config_param.version,day_counter,Config_param.control]).astype(int)
         outfile_mort = Config_param.outfile_mort
@@ -198,7 +219,7 @@ def run_IBM_coupled(Config_param, pset_ptero, fieldset, pclass, kernels, time_ma
         die_list,my_data = population_module.mortality(my_data,rate_g0_0,rate_g0_1,rate_g0_2,rate_g0_3,rate_g1_0,rate_g1_1,rate_g1_2,rate_g1_3,day=day_vec,outfile=outfile_mort)
         tbar.set_description(f'Day {day_counter}: Deletion')
         tbar.refresh
-        coupler_module.get_dead_particles(pset_ptero,die_list)
+        coupler_module.get_dead_particles(pset,die_list)
         
         
         tbar.set_description(f'Day {day_counter}: Growth')
@@ -228,7 +249,7 @@ def run_IBM_coupled(Config_param, pset_ptero, fieldset, pclass, kernels, time_ma
         #update pset_ptero
         tbar.set_description(f'Day {day_counter}: Updating')
         tbar.refresh
-        pset_ptero = coupler_module.update_particleset(my_data,pset_ptero,fieldset,pclass,year,i,die_list)
+        pset = coupler_module.update_particleset(my_data,pset,fieldset,pclass,year,i,die_list)
         
         #save my_Data as csv file
         tbar.set_description(f'Day {day_counter}: Saving')
@@ -242,12 +263,29 @@ def run_IBM_coupled(Config_param, pset_ptero, fieldset, pclass, kernels, time_ma
         
         tbar.set_description(f'Day {day_counter}: Done')
         tbar.refresh
-#        print('Day {} of year {} done'.format(day_counter,year))
             
     return
 
 
-def run_physics_only(Config_param, pset, fieldset, kernel, year, total_runtime=3, dt=1.0, outputdt=1.0):
+def run_physics_only(Config_param, pset, fieldset, kernel, year, total_runtime=3, dt=1.0, outputdt=None):
+    """This function runs the movement and interaction with the environment (kernel) of particles without the mortality, growth, development and spawing functions.
+    The function return an Ocean Parcels particle object with adapted attributes
+    
+        
+    Keyword arguments: 
+    Config_param -- dataclass object containing the paths for idealized environmental conditions, and model parameters
+    pset -- Ocean Parcels particle object containing the initial population with initialized attributes
+    fieldset -- Ocean Parcels fieldset object defining the environmental conditions
+    kernels -- Ocean Parcels kernel. Defines how the particels move and interact with the environment
+    year -- year of the simulation
+    total_runtime -- number of days to run the model using only physics and without population dynamics (default: 3 days)
+    dt -- sub-time-step to run the kernel (default: 1 hour)
+    outputdt -- time-step at which the physics only run is saved (default: None, and uses dt)
+    """
+    
+    assert dt <= 24, "The sub time-step should be smaller than the model time-step (1 day)"
+    if outputdt is None:
+        outputdt = dt
     
     if not os.path.exists(Config_param.output_dir_physics):
         os.makedirs(Config_param.output_dir_physics)
@@ -257,10 +295,13 @@ def run_physics_only(Config_param, pset, fieldset, kernel, year, total_runtime=3
         filename_day = Config_param.output_dir_physics+Config_param.physics_only_file.format(i)
         
         pset = coupler_module.prepare_particles(pset,fieldset,year)
+
+        outfile = None if outputdt==False else pset.ParticleFile(name=filename_day, outputdt=datetime.timedelta(hours=outputdt))
+
         
         pset.execute(kernel,runtime=datetime.timedelta(days=1.0),dt=datetime.timedelta(hours=dt),\
                        recovery={ErrorCode.ErrorThroughSurface: parcels_module.ReturnToSurface,ErrorCode.ErrorOutOfBounds: parcels_module.PushToWater},\
-                       verbose_progress=False,output_file=pset.ParticleFile(name=filename_day, outputdt=datetime.timedelta(hours=outputdt)))
+                       verbose_progress=False,output_file=outfile)
         
     return pset
 
