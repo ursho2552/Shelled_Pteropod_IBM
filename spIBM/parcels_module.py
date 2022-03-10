@@ -10,17 +10,11 @@ from parcels import JITParticle, Variable
 import numpy as np
 
 class PteropodParticle(JITParticle):
-    """Definition of the pteropod particles for parcels with all the attributes needed for the Movement and aragonite tracker function
+    """Definition of the attributes and additional characteristics of the pteropod particle.
     
-    
-    Parameters:
-    JITParticle (parcels obj): Custom parcels object 
-    
-    Returns:
-    None
-    
-    UHE 05/10/2020
-    
+    Keyword arguments:
+    JITParticle -- Ocean Parcels particle class
+
     """
     
     #Class of particles with attributes needed to keep track of DVM, stage, position
@@ -108,19 +102,15 @@ class PteropodParticle(JITParticle):
     
     
 def ReturnToSurface(particle, fieldset, time):
-    """This function handels through surface errors from parcels by returning the particle back to the surface.
+    """This function handels "through surface errors" by pushing particles back to below the surface
     
-    
-    Parameters:
-    particle (parcels obj): particle to be deleted
-    fieldset (dask array): fieldset describing the environment
-    time (float): current simulation time in parcels
-    
-    Returns:
-    None
-    UHE 5/10/2020
-    
-    """
+    Keyword arguments:
+    particle -- Ocean Parcels particle
+    fieldset -- Ocean Parcels fieldset
+    time -- Simulation time
+
+    """ 
+
     #read position in mask
     flag_rho = fieldset.mask[0,0,particle.lat,particle.lon]
     if flag_rho < 1:
@@ -143,19 +133,14 @@ def ReturnToSurface(particle, fieldset, time):
 
 
 def PushToWater(particle, fieldset, time):
-    """This function handels the through boundary error from parcels by pushing the particels up or away from the shoreline.
+    """This function handels "through boundary errors" by pushing particles back to the ocean if beached
     
-    
-    Parameters:
-    particle (parcels obj): particle to be deleted
-    fieldset (dask array): fieldset describing the environment
-    time (float): current simulation time in parcels
-    
-    Returns:
-    None
-    UHE 11/08/2021
-    
-    """
+    Keyword arguments:
+    particle -- Ocean Parcels particle
+    fieldset -- Ocean Parcels fieldset
+    time -- Simulation time
+
+    """ 
     
     #read position in mask
     flag_rho = fieldset.mask[0,0,particle.lat,particle.lon]
@@ -194,20 +179,15 @@ def PushToWater(particle, fieldset, time):
     
     
 def pteropod_kernel(particle, fieldset, time): 
-    """This function advects the particle horizontaly and vertically depending on the current velocities that they experience at their location
-    It also keeps them from getting beached, or going to far down or up
+    """This function defines the movement and interaction of pteropds with the environment
+    (In the future, this function should be separated into advection, DVM, interaction)
     
-    
-    Parameters:
-    particle (parcels obj): particle to be deleted
-    fieldset (dask array): fieldset describing the environment
-    time (float): current simulation time in parcels
-    
-    Returns:
-    None
-    UHE 9/10/2020
-    
-    """
+    Keyword arguments:
+    particle -- Ocean Parcels particle
+    fieldset -- Ocean Parcels fieldset
+    time -- Simulation time
+
+    """ 
     # ================================================================================================
     # Advection of particles using fourth-order Runge-Kutta integration including vertical velocity.
     # Function needs to be converted to Kernel object before execution
@@ -222,7 +202,6 @@ def pteropod_kernel(particle, fieldset, time):
     flag_rho = fieldset.mask[0,0,particle.lat,particle.lon]
     if flag_rho < 1:
         # push back to nearest water pixel
-        print('Particle beached ', flag_rho)
         unU = fieldset.unBeach_lon[0,0,particle.lat,particle.lon]
         unV = fieldset.unBeach_lat[0,0,particle.lat,particle.lon]
         
