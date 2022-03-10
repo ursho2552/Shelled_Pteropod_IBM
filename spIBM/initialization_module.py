@@ -10,7 +10,6 @@ from parcels import FieldSet, Field, ParticleSet
 import numpy as np
 import xarray as xr
 from dataclasses import dataclass
-import os
 import yaml
 import argparse
 import scipy.stats
@@ -18,6 +17,13 @@ import scipy.stats
 
 @dataclass
 class Config_parameters():
+    """Class to define paths and model parameters used in the model
+    
+    Keyword arguments:
+    None
+
+    """ 
+    
     data_path: str
     mesh_file: str
 
@@ -104,7 +110,14 @@ class Config_parameters():
     Tmax: float
     
 def read_config_files(config_file,config_class=Config_parameters):
-
+    """This function reads a configuration file, and fills in the attributes of the dataclass with the respective entries in the configuratio file
+    
+    Keyword arguments:
+    config_file -- path to configuration file. Should be a yaml file
+    config_class -- dataclass (default: Config_parameters dataclass defined above)
+    """ 
+    assert '.yaml' in config_file.lower(), "The configuration file should be a '.yaml' file"
+    
     with open(config_file) as file:
         config_list = yaml.load(file, Loader=yaml.FullLoader)
 
@@ -113,6 +126,9 @@ def read_config_files(config_file,config_class=Config_parameters):
     return config
 
 def parse_inputs():
+    """This reads user input from the terminal to start running the shelled pteropod IBM
+    
+    """ 
 
     parser = argparse.ArgumentParser(description="Run shelled pteropod IBM")
     parser.add_argument("--year", required=True, type=int,
@@ -137,18 +153,13 @@ def parse_inputs():
 
 
 def read_environment(Config_param, year,control=0):
-    """This function takes in the data path and path to the mesh file to define and read in the environmental conditions into parcels
+    """This function defines the environmental conditions for the coupled simulation.
+    The function defines an Ocean Parcels fieldset with all environmental conditions needed for the shelled pteropod IBM to run
     
-    
-    Parameters:
-    data_path (str): path to environmental variables (velocities, temperature, chlorophyll, aragonite, oxygen, depth, unbeach velocities, extremes)
-    mesh_path (str): path to mesh coordinates
-    year (int): current simulation year
-    control (bool): flag denoting if control simulations (aragonite fields without extremes; 1) or the normal simulation (0) should be used. Default value is 0
-    
-    Returns:
-    fieldset (Parcels obj): Ocean Parcels fieldset defining the environmental conditions
-    UHE 21/09/2021
+    Keyword arguments:
+    Config_param -- dataclass containing all paths and parameters
+    year -- year of the simulation. Should correspond to the names of the files
+    control -- flag to determine if a 'control' (control=1) field for aragonite is used instead of the original one (control=0)
     
     """
     data_path = Config_param.data_path
@@ -223,7 +234,15 @@ def read_environment(Config_param, year,control=0):
 
 
 def define_initial_population(number_of_individuals, start_generation, number_of_attributes=17):
-
+    """This function defines a starting population of eggs
+    
+    Keyword arguments:
+    number_of_individuals -- number of indidivuals in the starting population
+    start_generation -- start of the generation
+    number_of_attributes -- number of attributes to characterize each individual
+    
+    """
+    
     initial_population = np.random.rand(number_of_individuals, number_of_attributes)
     #ID
     initial_population[:,0] = np.arange(number_of_individuals)
@@ -265,8 +284,39 @@ def define_initial_population(number_of_individuals, start_generation, number_of
 
 
 
-def determine_starting_day(output_dir,gen0_file,gen1_file,observations,observations_std,start=None):
+def define_initial_population_dynamic(number_of_individuals, number_of_attributes, dictionary_of_values):
+    """This function defines a starting population with attributes defined in a dictionary
+    
+    Keyword arguments:
+    number_of_individuals -- number of indidivuals in the starting population
+    number_of_attributes -- number of attributes to characterize each individual
+    dictionary_of_values -- dictionary containing values or functions for each attribute
+    """
+    
+    assert len(dictionary_of_values) == number_of_attributes, "The disctionary must contain values for each attribute"
+    assert all([k for k in dictionary_of_values.keys()] == np.arange(number_of_attributes)), "The dictionary keys should be the indeces for the columns (attributes) given as integers"
+    
 
+    initial_population = np.random.rand(number_of_individuals, number_of_attributes)
+    
+    for key in dictionary_of_values.keys():
+    
+        initial_population[:,key] = dictionary_of_values[key]
+    
+    return initial_population
+
+
+def determine_starting_day(output_dir,gen0_file,gen1_file,observations,observations_std,start=None):
+    """This function determines the starting day given daily simulated abundances and observations and range in observed abundances
+    
+    Keyword arguments:
+    output_dir -- directory of files with modeled abundances
+    gen0_file -- file with abundances for the first generation
+    gen1_file -- file with abundances for the second generation
+    observations -- daily abundance observations
+    observations_std -- daily abundance ranges (here the standard deviation is used as an example)
+    start -- first day in the modeled abundance that should be considered in the comparison
+    """
 
     stage_0 = np.genfromtxt(output_dir+gen0_file,delimiter=',')
     stage_1 = np.genfromtxt(output_dir+gen1_file,delimiter=',')
@@ -291,7 +341,15 @@ def determine_starting_day(output_dir,gen0_file,gen1_file,observations,observati
 
 
 def read_attributes_from_file(filename_day_essential,fieldset,pclass):
-
+    """This function reads in the attributes of particels stored as xarray.
+    The function is very specific to the project, and should be adapted if the project changes, or a dynamic implementation is needed
+    
+    Keyword arguments:
+    filename_day_essential -- path to file containing all essential information for the particles
+    fieldset -- Ocean Parcesl fieldset defining the environmental conditions
+    pclass -- Ocean Parcels particle class
+    """
+    
     ds = xr.open_dataset(filename_day_essential)
 
     time = ds.time[:,-1].values
@@ -362,26 +420,46 @@ def read_attributes_from_file(filename_day_essential,fieldset,pclass):
     return pset, max_ID, current_gen
 
 
-def reset_particle_attributes(pset,initial_population):
-    
+def reset_particle_attributes(pset,initial_population,dictionary):
+    """This function resets the attributes of a particle set to those provided in a matrix.
 
-    pset.particle_data['time'][:] = 0.0
-    pset.particle_data['stage'][:] = initial_population[:,2]
-    pset.particle_data['survive'][:] = initial_population[:,5]
-    pset.particle_data['num_spawning_event'][:] = initial_population[:,6]
-    pset.particle_data['generation'][:] = initial_population[:,1]
-    pset.particle_data['shell_size'][:] = initial_population[:,3]
-    pset.particle_data['days_of_growth'][:] = initial_population[:,4]
-    pset.particle_data['ERR'][:] = initial_population[:,7]
-    pset.particle_data['spawned'][:] = initial_population[:,8]
-    pset.particle_data['Parent_ID'][:] = initial_population[:,9]
-    pset.particle_data['Parent_shell_size'][:] = initial_population[:,10]
-    pset.particle_data['MyID'][:] = initial_population[:,0]
-    pset.particle_data['damage'][:] = initial_population[:,14]
+    
+    Keyword arguments:
+    pset -- Ocean Parcels particleset
+    initial_population -- array containing the values 
+    dictionary -- dictionary containing the attributes of pset to change (key) and values to change
+    """
+
+    for key in dictionary.keys():
+        pset.particle_data[key][:] = dictionary[key]
+    
+#    pset.particle_data['time'][:] = 0.0
+#    pset.particle_data['stage'][:] = initial_population[:,2]
+#    pset.particle_data['survive'][:] = initial_population[:,5]
+#    pset.particle_data['num_spawning_event'][:] = initial_population[:,6]
+#    pset.particle_data['generation'][:] = initial_population[:,1]
+#    pset.particle_data['shell_size'][:] = initial_population[:,3]
+#    pset.particle_data['days_of_growth'][:] = initial_population[:,4]
+#    pset.particle_data['ERR'][:] = initial_population[:,7]
+#    pset.particle_data['spawned'][:] = initial_population[:,8]
+#    pset.particle_data['Parent_ID'][:] = initial_population[:,9]
+#    pset.particle_data['Parent_shell_size'][:] = initial_population[:,10]
+#    pset.particle_data['MyID'][:] = initial_population[:,0]
+#    pset.particle_data['damage'][:] = initial_population[:,14]
         
     return pset
 
 def initialize_particles(fieldset, pclass, initial_population, locations):
+    """This function initializes a particle set. Function is specific to the project, and should be adapted for other projects
+
+    Keyword arguments:
+    fieldset -- Ocean Parcels particleset
+    pclass -- Ocean Parcels particle class
+    initial_population -- Initial values for particel attributes
+    locations -- locations of pteorpods, lons in first column, lats in second column, depth in the third column for each pteropod
+    
+    """
+    assert locations.shape[0] == initial_population.shape[0], "The number of entries in the initial population and the locationas is not the same"
     
     depths = locations[:,2].astype(np.float32)
     lats = locations[:,1].astype(np.float32)
@@ -423,21 +501,16 @@ def rmse(predictions, targets):
     
     
 def match_to_observations(data,observations,observations_std,start=None):
-    """This function calculates the optimal pattern match up between the data from the model and reference data.
-    The reference data needs to be in monthly means (12 entries). Data has to be in daily data. 
-    The similarity is calculated using the Dynamic Time Warping (DTW) approach.
+    """This function calculates the optimal pattern match up between the data from the model and obsevations data.
+    The similarity is calculated based on the Pearson, Spearman correlation coefficients, the Manhattan distance, and
+    the range of modeled abundances outside of the range of observed abundances. Function returns the mean, rolling mean, the start day, and similarity metrics
     
-    Parameters:
-    data (array): Array containing the daily output
-    start (int): start index from which the time series of data is taken
-    end (int): maximum index of the time series of data
-    ref_data (string): Path to netcdf file with monthly means
-    
-    Returns:
-    min_start (int): index at which the pattern matchup is best between data and reference data
-    
-    UHE 01/10/2020
-    """ 
+    Keyword arguments:
+    data -- modeled abudances
+    observations -- observed abundances
+    observations_std -- range of observed abundances
+    start -- first day to consider in data for the comparison (default: None, the comparison is only done for the last third of data)
+    """
     
     assert len(observations) == len(observations_std), "The observations and the observations_std should have the same size"
     
