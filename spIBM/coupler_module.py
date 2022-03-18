@@ -190,13 +190,12 @@ def prepare_particles(pset,fieldset,year,w_down=45,w_up=45,w_down_wings=14,max_s
         
     return pset  
 
-def convert_to_mat(pset,reseed=False):
+def convert_to_mat(pset):
     """This function converts a parcels object to a numpy array
     
     
     Parameters:
     pst (parcels obj): particle to be deleted
-    reseed (bool): determines if a boolean array is returned that flags the individuals that need to be reseeded.
     
     Returns:
     matrix (numpy array): array containing all values stored in pset

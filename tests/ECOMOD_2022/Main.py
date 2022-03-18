@@ -62,8 +62,21 @@ if __name__ in "__main__":
     if not os.path.exists(My_config.output_dir_initialization):
         os.makedirs(My_config.output_dir_initialization)
         np.random.seed(seed=My_config.seed)
-        
-    my_pteropods = spIBM.define_initial_population(number_of_individuals=1500, start_generation=0, number_of_attributes=17)
+    
+    number_of_individuals = 15000
+    start_generation = 0
+    number_of_attributes = 17
+    
+    my_pteropods = spIBM.define_initial_population(number_of_individuals=number_of_individuals, start_generation=start_generation, number_of_attributes=number_of_attributes)
+    
+    #Alternative
+    
+#    my_attributes = {0: np.arange(number_of_individuals), 
+#           1: start_generation, 2: 0, 3: 0.15, 4: 0, 5: 1,
+#           6: 0, 7: np.random.uniform(low=-1,high=1, size=(number_of_individuals)),
+#           8: 0, 9: -1, 10: -1, 11: -1, 12: 0, 13: 0, 14: 0, 15: 0, 16: 1}
+#    my_pteropods = spIBM.define_initial_population_dynamic(number_of_individuals=number_of_individuals, number_of_attributes=number_of_attributes, dictionary_of_values=my_attributes)
+#    
     
     if My_config.flag_calculate_initial_population == True:
         spIBM.run_IBM_idealized(My_config,my_pteropods,start_gen=0,time=5000,L_t=None,save_population=True,save_abundance=True)
@@ -121,7 +134,23 @@ if __name__ in "__main__":
     my_file = My_config.output_dir_physics+My_config.physics_only_file.format(My_config.version)
     pset_ptero = ParticleSet.from_particlefile(fieldset=fieldset, pclass=pclass, filename=my_file,lonlatdepth_dtype=np.float32)
     
-    pset_ptero = spIBM.reset_particle_attributes(pset_ptero,initial_population)
+    
+    #Dynamic version of reset_particle_attributes
+    reset_dictionary = {'time': 0.0,
+                        'MyID': initial_population[:,0],
+                        'generation': initial_population[:,1],
+                        'stage': initial_population[:,2],
+                        'shell_size': initial_population[:,3],
+                        'days_of_growth': initial_population[:,4],
+                        'survival': initial_population[:,5],
+                        'num_spawning_event': initial_population[:,6],
+                        'ERR': initial_population[:,7],
+                        'spawned': initial_population[:,8],
+                        'Parent_ID': initial_population[:,9],
+                        'Parent_shell_size': initial_population[:,10],
+                        'damage': initial_population[:,14]}
+        
+    pset_ptero = spIBM.reset_particle_attributes(pset_ptero,initial_population,reset_dictionary)
 
     # =========================================================================
     # Run coupled model
