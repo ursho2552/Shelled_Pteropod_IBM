@@ -211,7 +211,7 @@ def run_IBM_coupled(Config_param, pset, fieldset, pclass, kernels, time_mat,next
         
         tbar.set_description(f'Day {day_counter}: Mortality')
         tbar.refresh
-        my_data = coupler_module.convert_to_mat(pset,i)
+        my_data = coupler_module.convert_to_mat(pset)
         
         day_vec = np.array([year,Config_param.version,day_counter,Config_param.control]).astype(int)
         outfile_mort = Config_param.outfile_mort
