@@ -348,7 +348,7 @@ def calculate_dissolution_calcification(L,damage,delta_L,Arag,gain_flag=0):
     loss = 65.76 * np.exp(-4.7606*Aragn)*Shell_calc/100
 
     zero = np.zeros(L.size)
-    L_new = Ln.copy()*0.0
+    L_new = Ln.copy()
     Shell_new = Ln.copy()*0.0
     
     #Calculate calcification at size L
