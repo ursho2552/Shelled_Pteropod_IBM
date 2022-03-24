@@ -2,17 +2,19 @@
 # -*- coding: utf-8 -*-
 """
 Created on Mon Mar  7 14:48:46 2022
-Functions used to calculate the mortality, growth, development, and spawning of the modeled pteropods
+Functions used to calculate the mortality, growth, development, and spawning of
+the modeled pteropods
 @author: ursho
 """
-
+import os
 import numpy as np
 import scipy
-import os
+
 
 def calculate_growth_fct():
     """Calculate the shell size of pteropods as a function of their age.
-    The formula was taken from Wang et al., 2017. Returns the growth rate in (mm) as a function of time after birth
+    The formula was taken from Wang et al., 2017. Returns the growth rate in
+    (mm) as a function of time after birth
 
     Keyword arguments:
     None
@@ -36,17 +38,23 @@ def calculate_growth_fct():
 
 
 
-def get_number_individuals(indeces,stage,generation,rate_g0_0,rate_g0_1,rate_g0_2,rate_g0_3,rate_g1_0,rate_g1_1,rate_g1_2,rate_g1_3):
-    """This function uses beta survival (b) rates to calculate the fraction of individual that survive after one time step. Returns the number of individuals
-    that would die on position 0, and the mortality rate (1-rate) on position 1. UHE 25/09/2020
+def get_number_individuals(
+        indeces,stage,generation,rate_g0_0,rate_g0_1,rate_g0_2,
+        rate_g0_3,rate_g1_0,rate_g1_1,rate_g1_2,rate_g1_3):
+    """This function uses beta survival (b) rates to calculate the fraction of
+    individual that survive after one time step. Returns the number of
+    individuals that would die on position 0, and the mortality rate (1-rate)
+    on position 1.
+
     The function used is taken from Bednarsek et al., 2016:
-        N_{t+1} = N_{t}*exp(-b*t),
-        rate = exp(-b*t) with t = 1 day.
+    N_{t+1} = N_{t}*exp(-b*t),
+    rate = exp(-b*t) with t = 1 day.
 
     Keyword arguments:
     indeces -- list of indeces of a specific stage in the population
     stage -- integer identifier for the life stage
-    generation -- integer identifier for the generation, 0 for spring, 1 for winter
+    generation -- integer identifier for the generation, 0 for spring, 1 for
+        winter
     rate_gX_Y -- beta survival rates for each stage and generation
     """
     if generation == 0:
@@ -72,16 +80,23 @@ def get_number_individuals(indeces,stage,generation,rate_g0_0,rate_g0_1,rate_g0_
     return [int(np.around(indeces.size*(1-rate))),1-rate]
 
 
-def mortality(pteropod_list,rate_g0_0=0.211,rate_g0_1=0.09,rate_g0_2=0.09,rate_g0_3=0.09,
-            rate_g1_0=0.142,rate_g1_1=0.01,rate_g1_2=0.01,rate_g1_3=0.01,day=None,outfile='/cluster/scratch/ursho/output_simulation_extremes/mortalities/'):
-    """Select subsets of the individuals found in pteropod list according to their stage and generation.
-    These are then used in 'get_number_individuals' function to calculate the mortality rates. Returns list of indeces of individuals that die, and the
-    pteropod array with updated values for survival. UHE 25/09/2020
+def mortality(
+        pteropod_list,rate_g0_0=0.211,rate_g0_1=0.09,rate_g0_2=0.09,
+        rate_g0_3=0.09,rate_g1_0=0.142,rate_g1_1=0.01,rate_g1_2=0.01,
+        rate_g1_3=0.01,day=None,
+        outfile='/cluster/scratch/ursho/output_simulation_extremes/mortalities/'):
+    """Select subsets of the individuals found in pteropod list according to
+    their stage and generation. These are then used in 'get_number_individuals'
+    function to calculate the mortality rates. Returns list of indeces of
+    individuals that die, and the pteropod array with updated values for
+    survival. UHE 25/09/2020
 
     Keyword arguments:
-    pteorpod_list -- array containing all state variables characterizing the pteropods
+    pteorpod_list -- array containing all state variables characterizing the
+        pteropods
     rate_gX_Y -- beta mortality rates for each stage and generation
-    day -- list containing year, version, day and control for saving causes for mortalitites (background, old age, spawning,...; default None)
+    day -- list containing year, version, day and control for saving causes for
+    mortalitites (background, old age, spawning,...; default None)
     outfile -- output directory
 
     """
@@ -141,7 +156,7 @@ def mortality(pteropod_list,rate_g0_0=0.211,rate_g0_1=0.09,rate_g0_2=0.09,rate_g
     num_dead_old = np.sum(pteropod_list[:,5]==0) - num_dead_dis - num_dead_nat
 
     pteropod_list[np.squeeze(np.argwhere(pteropod_list[:,16] <= 0)),5] = 0
-    num_dead_beaching = np.sum(pteropod_list[:,5]==0) - num_dead_dis - num_dead_nat - num_dead_old
+#    num_dead_beaching = np.sum(pteropod_list[:,5]==0) - num_dead_dis - num_dead_nat - num_dead_old
 #    print('Death beaching: {}'.format(num_dead_beaching))
     num_dead_old = np.sum(pteropod_list[:,5]==0) - num_dead_dis - num_dead_nat
 
@@ -171,7 +186,7 @@ def mortality(pteropod_list,rate_g0_0=0.211,rate_g0_1=0.09,rate_g0_2=0.09,rate_g
 
         outfile_mort = outfile+'year_{}_V_{}_control_{}/'.format(day[0],day[1],day[3])
         if not os.path.exists(outfile_mort):
-                os.makedirs(outfile_mort)
+            os.makedirs(outfile_mort)
         array_save = np.array([num_dead_nat,num_dead_dis,num_dead_old])
 #        print(array_save.shape)
 #        print(array_save)
@@ -180,20 +195,30 @@ def mortality(pteropod_list,rate_g0_0=0.211,rate_g0_1=0.09,rate_g0_2=0.09,rate_g
     return dead_particles,new_pteropod_list
 
 
-def mortality_DW(pteropod_list,rate_g0_0=0.211,rate_g0_1=0.09,rate_g0_2=0.09,rate_g0_3=0.09,
-            rate_g1_0=0.142,rate_g1_1=0.01,rate_g1_2=0.01,rate_g1_3=0.01,longevity=390,base1=5.26,
-                 exp1=-0.25,base2=5.26,exp2=-0.25,day=None,outfile='/cluster/scratch/ursho/output_simulation_extremes/mortalities/'):
-    """Select subsets of the individuals found in pteropod list according to their stage and generation.
-    These are then used in 'get_number_individuals' function to calculate the mortality rates. Returns list of indeces of individuals that die, and the
-    pteropod array with updated values for survival. UHE 25/09/2020
+def mortality_dw(
+        pteropod_list,rate_g0_0=0.211,rate_g0_1=0.09,rate_g0_2=0.09,
+        rate_g0_3=0.09,rate_g1_0=0.142,rate_g1_1=0.01,rate_g1_2=0.01,
+        rate_g1_3=0.01,longevity=390,base1=5.26,exp1=-0.25,base2=5.26,
+        exp2=-0.25,day=None,
+        outfile='/cluster/scratch/ursho/output_simulation_extremes/mortalities/'):
+
+    """Select subsets of the individuals found in pteropod list according to
+    their stage and generation. These are then used in 'get_number_individuals'
+    function to calculate the mortality rates. Returns list of indeces of
+    individuals that die, and the pteropod array with updated values for
+    survival. UHE 25/09/2020
 
     Keyword arguments:
-    pteorpod_list -- array containing all state variables characterizing the pteropods
+    pteorpod_list -- array containing all state variables characterizing the
+        pteropods
     rate_gX_Y -- beta mortality rates for each stage and generation
     longevity -- maximum longevity
-    baseX -- base of equation used to calculate the dry weight specific mortality for the X generation
-    expX -- exponent of equation used to calculate the dry weight specific mortality for the X generation
-    day -- list containing year, version, day and control for saving causes for mortalitites (background, old age, spawning,...; default None)
+    baseX -- base of equation used to calculate the dry weight specific
+        mortality for the X generation
+    expX -- exponent of equation used to calculate the dry weight specific
+        mortality for the X generation
+    day -- list containing year, version, day and control for saving causes for
+        mortalitites (background, old age, spawning,...; default None)
     outfile -- output directory
 
     """
@@ -267,7 +292,7 @@ def mortality_DW(pteropod_list,rate_g0_0=0.211,rate_g0_1=0.09,rate_g0_2=0.09,rat
     num_dead_old = np.sum(pteropod_list[:,5]==0) - num_dead_dis - num_dead_nat
 
     pteropod_list[np.squeeze(np.argwhere(pteropod_list[:,16] <= 0)),5] = 0
-    num_dead_beaching = np.sum(pteropod_list[:,5]==0) - num_dead_dis - num_dead_nat - num_dead_old
+#    num_dead_beaching = np.sum(pteropod_list[:,5]==0) - num_dead_dis - num_dead_nat - num_dead_old
 #    print('Death beaching: {}'.format(num_dead_beaching))
     num_dead_old = np.sum(pteropod_list[:,5]==0) - num_dead_dis - num_dead_nat
 
@@ -296,7 +321,7 @@ def mortality_DW(pteropod_list,rate_g0_0=0.211,rate_g0_1=0.09,rate_g0_2=0.09,rat
 
         outfile_mort = outfile+'year_{}_V_{}_control_{}/'.format(day[0],day[1],day[3])
         if not os.path.exists(outfile_mort):
-                os.makedirs(outfile_mort)
+            os.makedirs(outfile_mort)
         array_save = np.array([num_dead_nat,num_dead_dis,num_dead_old])
 #        print(array_save.shape)
 #        print(array_save)
@@ -309,9 +334,10 @@ def mortality_DW(pteropod_list,rate_g0_0=0.211,rate_g0_1=0.09,rate_g0_2=0.09,rat
 
 
 def calculate_shell_carbonate(L):
-    """This function calculates the calcium carbonate content in the shell of a pteropod
-    The function is taken from Bednarsek et al., Deep Sea Research Part 2 59: 105-116 (2012)
-    Returns the calcium carbonate content in mg CaCO3 on position 0 and the dry weight in mg DW on position 1. UHE 25/09/2020
+    """This function calculates the calcium carbonate content in the shell of
+    a pteropod. The function is taken from Bednarsek et al., Deep Sea Research
+    Part 2 59: 105-116 (2012). Returns the calcium carbonate content in mg
+    CaCO3 on position 0 and the dry weight in mg DW on position 1. UHE 25/09/2020
 
     Keyword arguments:
     L -- Shell size in mm
@@ -323,10 +349,14 @@ def calculate_shell_carbonate(L):
     return Shell_calc,DW
 
 def calculate_dissolution_calcification(L,damage,delta_L,Arag,gain_flag=0):
-    """This function calculates the loss and gain of CaCO3 given the current size, growth function, and exposure to aragonite saturation states.
-    The function first determines the dissolution, and compares it to the calcium carbonate that could be produced under non-corrosive conditions
-    to calculate the net gain/loss of CaCO3. The pteropod can then either repair the damage as much as possible or grow. Returns the new shell size in mm
-    after dissolution/lack of accretion on position 0, and the accumulated damage in mg CaCO3 on position 1. UHE 13/01/2022
+    """This function calculates the loss and gain of CaCO3 given the current
+    size, growth function, and exposure to aragonite saturation states. The
+    function first determines the dissolution, and compares it to the calcium
+    carbonate that could be produced under non-corrosive conditions to
+    calculate the net gain/loss of CaCO3. The pteropod can then either repair
+    the damage as much as possible or grow. Returns the new shell size in mm
+    after dissolution/lack of accretion on position 0, and the accumulated
+    damage in mg CaCO3 on position 1. UHE 13/01/2022
 
 
     Keyword arguments:
@@ -334,7 +364,8 @@ def calculate_dissolution_calcification(L,damage,delta_L,Arag,gain_flag=0):
     damage -- Current accumulated damage in mg CaCO3
     delta_L -- Current increase in size under idealized conditions in mm
     Arag -- Aragonite saturation state experienced by pteropod
-    gain_flag -- Identifier to determine if additional calcifiction should be considered
+    gain_flag -- Identifier to determine if additional calcifiction should be
+        considered
 
     """
     #ensure the input is an array even if scalars are given as input
@@ -374,21 +405,31 @@ def calculate_dissolution_calcification(L,damage,delta_L,Arag,gain_flag=0):
     return L_new,damagen
 
 
-def shell_growth(pteropod_list,growth_fct_gen0,Arag=4,T=16,F=7,T0=14.5,Ks=4.8,Tmax=31,Tmin=0.6,day=None,outfile='/cluster/scratch/ursho/output_simulation_extremes/Growth/'): #Ks=4.8
-    """This function determines the net shell growth given the aragonite saturation state, current size, and generation. Returns array
+def shell_growth(
+        pteropod_list,growth_fct_gen0,Arag=4,T=16,F=7,T0=14.5,
+        Ks=4.8,Tmax=31,Tmin=0.6,day=None,
+        outfile='/cluster/scratch/ursho/output_simulation_extremes/Growth/'):
+    """This function determines the net shell growth given the aragonite
+    saturation state, current size, and generation. Returns array
     containing updated attributes characterizing the pteropods. UHE 25/09/2020
 
     Keyword arguments:
-    pteorpod_list -- Array containing all state variables characterizing the pteropods
-    growth_fct_gen0 -- Shell size as function of time for spring (X=0) and winter (X=1) generation
+    pteorpod_list -- Array containing all state variables characterizing the
+        pteropods
+    growth_fct_gen0 -- Shell size as function of time for spring (X=0)
+        and winter (X=1) generation
     Arag -- Aragonite saturation state experiences by each pteropod on one day
     T -- Temperature. Default value was set to 16 to simulate optimal conditions
-    F -- Food/Phytoplankton carbon available. Default value 7 was chosen to simulate optimal conditions
-    T0 -- Refernce temperature for the growth rate. Default value set to 14.5 according to Wang et al. 2017
-    Ks -- Food/Phytoplankton carbon half-saturation constant. The default value is set to 2.6
+    F -- Food/Phytoplankton carbon available. Default value 7 was chosen to
+        simulate optimal conditions
+    T0 -- Refernce temperature for the growth rate. Default value set to 14.5
+        according to Wang et al. 2017
+    Ks -- Food/Phytoplankton carbon half-saturation constant. The default
+        value is set to 2.6
     Tmax -- Maximum temperature for growth
     Tmin -- Minimum temperature for growth
-    day -- list containing year, version, day and control for saving all growth rates for each day (default None)
+    day -- list containing year, version, day and control for saving all
+        growth rates for each day (default None)
     outfile -- output directory
 
     """
@@ -444,12 +485,13 @@ def shell_growth(pteropod_list,growth_fct_gen0,Arag=4,T=16,F=7,T0=14.5,Ks=4.8,Tm
     return pteropod_list
 
 def development(pteropod_list,growth_fct_gen0):
-    """This function determines the life stage depending on the size of the pteropods.
-    And increases the growth time by one day. Returns array containing updated attributes
-    characterizing the pteropods. UHE 25/09/2020
+    """This function determines the life stage depending on the size of the
+    pteropods. And increases the growth time by one day. Returns array
+    containing updated attributes characterizing the pteropods. UHE 25/09/2020
 
     Keyword arguments:
-    pteropod_list -- Array containing all state variables characterizing the pteropods
+    pteropod_list -- Array containing all state variables characterizing the
+        pteropods
     growth_fct_gen0 -- Shell size as function of time
 
     """
@@ -464,15 +506,20 @@ def development(pteropod_list,growth_fct_gen0):
     return pteropod_list
 
 def spawning(pteropod_list, current_generation,next_ID,num_eggs=500,delta_ERR=20):
-    """This function subsets the adult pteropods of a given generation, and determines which pteropods are ready to spawn eggs.
-    Returns the array containing the updated attributes characterizing the pteropods, the next largest ID, and the current generation spawning. UHE 25/09/2020
+    """This function subsets the adult pteropods of a given generation, and
+    determines which pteropods are ready to spawn eggs. Returns the array
+    containing the updated attributes characterizing the pteropods, the next
+    largest ID, and the current generation spawning. UHE 25/09/2020
 
     Keyword arguments:
-    pteropod_list -- Array containing all state variables characterizing the pteropods
-    current_generation -- Identifier of the current generation that will spawn the next generation
+    pteropod_list -- Array containing all state variables characterizing the
+        pteropods
+    current_generation -- Identifier of the current generation that will spawn
+        the next generation
     next_ID -- The largest ID + 1 out of the entire population
     num_eggs -- Number of eggs spawned per adult of a single spawning event
-    delta_ERR -- increase in the Egg Release Readiness (ERR) index per day as 1/delta_ERR
+    delta_ERR -- increase in the Egg Release Readiness (ERR) index per day as
+        1/delta_ERR
 
     """
 
@@ -546,18 +593,26 @@ def spawning(pteropod_list, current_generation,next_ID,num_eggs=500,delta_ERR=20
 
     return pteropod_list, next_ID, current_generation
 
-def spawning_gradual(pteropod_list, current_generation,next_ID,max_eggs=500,max_size=3.962,num_eggs_per_size=None,sizes_per_egg=None):
-    """This function subsets the adult pteropods of a given generation, and determines which pteropods are ready to spawn eggs.
+def spawning_gradual(
+        pteropod_list, current_generation,next_ID,max_eggs=500,
+        max_size=3.962,num_eggs_per_size=None,sizes_per_egg=None):
+    """This function subsets the adult pteropods of a given generation, and
+    determines which pteropods are ready to spawn eggs.
     The egg production is linked to the size of the pteropods
-    Returns the array containing the updated attributes characterizing the pteropods, the next largest ID, and the current generation spawning. UHE 10/02/2022
+    Returns the array containing the updated attributes characterizing the
+    pteropods, the next largest ID, and the current generation spawning.
+    UHE 10/02/2022
 
     Keyword arguments:
-    pteropod_list -- Array containing all state variables characterizing the pteropods
-    current_generation -- Identifier of the current generation that will spawn the next generation
+    pteropod_list -- Array containing all state variables characterizing the
+        pteropods
+    current_generation -- Identifier of the current generation that will spawn
+        the next generation
     next_ID -- The largest ID + 1 out of the entire population
     max_eggs -- Maximum number of eggs per adult throughout their life time
     max_size -- Maximum size of pteropods (proposed by Reviewer)
-    num_eggs_per_size -- list containing the number of eggs produced at a given size
+    num_eggs_per_size -- list containing the number of eggs produced at a given
+        size
     sizes_per_eggs -- list of sizes at which a defined number of eggs is produced
 
     """
