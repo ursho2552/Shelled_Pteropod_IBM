@@ -332,7 +332,7 @@ def calculate_dissolution_calcification(L,damage,delta_L,Arag,gain_flag=0):
     Keyword arguments:
     L -- Shell size in mm
     damage -- Current accumulated damage in mg CaCO3
-    delta_L -- Current growth rate in mm/day
+    delta_L -- Current increase in size under idealized conditions in mm
     Arag -- Aragonite saturation state experienced by pteropod
     gain_flag -- Identifier to determine if additional calcifiction should be considered  
 
