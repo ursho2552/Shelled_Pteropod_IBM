@@ -59,17 +59,15 @@ def run_IBM_idealized(Config_param,my_pteropods,start_gen=0,time=5000,L_t=None,s
     current_gen = start_gen
     next_ID = number_of_individuals
     
-    #spring generation
-    rate_g0_0 = Config_param.rateG00
-    rate_g0_1 = Config_param.rateG01
-    rate_g0_2 = Config_param.rateG02
-    rate_g0_3 = Config_param.rateG03
-
-    #overwintering generation
-    rate_g1_0 = Config_param.rateG10
-    rate_g1_1 = Config_param.rateG11
-    rate_g1_2 = Config_param.rateG12
-    rate_g1_3 = Config_param.rateG13
+    mortality_rate_dict = {'0': {'0': Config_param.rateG00,
+                                 '1': Config_param.rateG01,
+                                 '2': Config_param.rateG02,
+                                 '3': Config_param.rateG03},
+    
+                           '1': {'0': Config_param.rateG10,
+                                 '1': Config_param.rateG11,
+                                 '2': Config_param.rateG12,
+                                 '3': Config_param.rateG13}}
     
     mynumeggs = Config_param.num_eggs
     delta_ERR = Config_param.delta_ERR
@@ -86,8 +84,7 @@ def run_IBM_idealized(Config_param,my_pteropods,start_gen=0,time=5000,L_t=None,s
         T = daily_sst[(day_start+i)%365]
         F = daily_food[(day_start+i)%365]
         #mortality
-        die_list,my_pteropods = population_module.mortality(my_pteropods,rate_g0_0,rate_g0_1,rate_g0_2,rate_g0_3,
-                           rate_g1_0,rate_g1_1,rate_g1_2,rate_g1_3)
+        die_list,my_pteropods = population_module.mortality(my_pteropods,mortality_rate_dict)
 
         #growth
         my_pteropods = population_module.shell_growth(my_pteropods,L_t,Arag=4,T=T,F=F,T0=T0,Ks=Ks)
@@ -154,17 +151,17 @@ def run_IBM_coupled(Config_param, pset, fieldset, pclass, kernels, time_mat,next
     L_t -- size of the pteropod (in mm) as a function of time (default: None). For the default value we use the growth function from Wang et al. 2017
     """
 
-    #spring generation
-    rate_g0_0 = Config_param.rateG00
-    rate_g0_1 = Config_param.rateG01
-    rate_g0_2 = Config_param.rateG02
-    rate_g0_3 = Config_param.rateG03
-
-    #overwintering generation
-    rate_g1_0 = Config_param.rateG10
-    rate_g1_1 = Config_param.rateG11
-    rate_g1_2 = Config_param.rateG12
-    rate_g1_3 = Config_param.rateG13
+ 
+    mortality_rate_dict = {'0': {'0': Config_param.rateG00,
+                                 '1': Config_param.rateG01,
+                                 '2': Config_param.rateG02,
+                                 '3': Config_param.rateG03},
+    
+                           '1': {'0': Config_param.rateG10,
+                                 '1': Config_param.rateG11,
+                                 '2': Config_param.rateG12,
+                                 '3': Config_param.rateG13}}
+    
     
     dir_env = Config_param.dir_env
     food_file = Config_param.food_file
@@ -216,7 +213,7 @@ def run_IBM_coupled(Config_param, pset, fieldset, pclass, kernels, time_mat,next
         day_vec = np.array([year,Config_param.version,day_counter,Config_param.control]).astype(int)
         outfile_mort = Config_param.outfile_mort
         
-        die_list,my_data = population_module.mortality(my_data,rate_g0_0,rate_g0_1,rate_g0_2,rate_g0_3,rate_g1_0,rate_g1_1,rate_g1_2,rate_g1_3,day=day_vec,outfile=outfile_mort)
+        die_list,my_data = population_module.mortality(my_data,mortality_rate_dict,day=day_vec,outfile=outfile_mort)
         tbar.set_description(f'Day {day_counter}: Deletion')
         tbar.refresh
         coupler_module.get_dead_particles(pset,die_list)

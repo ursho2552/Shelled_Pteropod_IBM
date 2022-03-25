@@ -20,27 +20,25 @@ def calculate_growth_fct():
     None
     """
 
-    WP = 0.1
+    winter_point = 0.1
     K = 5.07
-    L_inf = 4.53
+    length_inf = 4.53
     C = 0.4
-    ts = WP-0.5
-    t0 = 120/365
 
-    t = np.arange(121,121+300)/365
+    time_s = winter_point - 0.5
+    time_0 = 120/365
+    time = np.arange(121, 121 + 300)/365
 
-    S_t = (C*K)/(2*np.pi) * np.sin(2*np.pi*(t-ts))
-    S_t0 = (C*K)/(2*np.pi) * np.sin(2*np.pi*(t0-ts))
-    L_t_spring = L_inf*(1-np.exp(-(K*(t-t0) + S_t - S_t0)))
-    L_t_spring += 0.15-L_t_spring[0]
+    seasonal_change = (C*K)/(2*np.pi) * np.sin(2*np.pi*(time - time_s))
+    seasonal_change_start = (C*K)/(2*np.pi) * np.sin(2*np.pi*(time_0 - time_s))
+    length_t = length_inf*(1 - np.exp(-(K*(time - time_0) + seasonal_change - seasonal_change_start)))
+    length_t += 0.15 - length_t[0]
 
-    return L_t_spring
+    return length_t
 
 
 
-def get_number_individuals(
-        indeces,stage,generation,rate_g0_0,rate_g0_1,rate_g0_2,
-        rate_g0_3,rate_g1_0,rate_g1_1,rate_g1_2,rate_g1_3):
+def get_number_individuals(indeces, rate_generation_stage):
     """This function uses beta survival (b) rates to calculate the fraction of
     individual that survive after one time step. Returns the number of
     individuals that would die on position 0, and the mortality rate (1-rate)
@@ -57,33 +55,14 @@ def get_number_individuals(
         winter
     rate_gX_Y -- beta survival rates for each stage and generation
     """
-    if generation == 0:
-        if stage == 0:
-            rate = np.exp(-rate_g0_0)
-        elif stage == 1:
-            rate = np.exp(-rate_g0_1)
-        elif stage == 2:
-            rate = np.exp(-rate_g0_2)
-        elif stage == 3:
-            rate = np.exp(-rate_g0_3)
 
-    elif generation == 1:
-        if stage == 0:
-            rate = np.exp(-rate_g1_0)
-        if stage == 1:
-            rate = np.exp(-rate_g1_1)
-        elif stage == 2:
-            rate = np.exp(-rate_g1_2)
-        elif stage == 3:
-            rate = np.exp(-rate_g1_3)
+    rate = np.exp(-rate_generation_stage)
 
     return [int(np.around(indeces.size*(1-rate))),1-rate]
 
 
 def mortality(
-        pteropod_list,rate_g0_0=0.211,rate_g0_1=0.09,rate_g0_2=0.09,
-        rate_g0_3=0.09,rate_g1_0=0.142,rate_g1_1=0.01,rate_g1_2=0.01,
-        rate_g1_3=0.01,day=None,
+        pteropod_list, mortality_rate_dict, day=None,
         outfile='/cluster/scratch/ursho/output_simulation_extremes/mortalities/'):
     """Select subsets of the individuals found in pteropod list according to
     their stage and generation. These are then used in 'get_number_individuals'
@@ -94,9 +73,9 @@ def mortality(
     Keyword arguments:
     pteorpod_list -- array containing all state variables characterizing the
         pteropods
-    rate_gX_Y -- beta mortality rates for each stage and generation
+    mortality_rate_dict -- beta mortality rates for each stage and generation
     day -- list containing year, version, day and control for saving causes for
-    mortalitites (background, old age, spawning,...; default None)
+        mortalitites (background, old age, spawning,...; default None)
     outfile -- output directory
 
     """
@@ -108,15 +87,18 @@ def mortality(
     all_delta_rates = np.array([])
     all_rates = np.array([])
     all_tmps = np.array([])
-    for gen in range(2):
-        for i in range(4):
-            tmp = np.squeeze(np.argwhere((pteropod_list[:,2] == i) & (pteropod_list[:,1]%2 == gen)))
+
+    for gen in mortality_rate_dict.keys():
+        for stage in mortality_rate_dict[gen].keys():
+
+            tmp = np.squeeze(np.argwhere((pteropod_list[:,2] == stage)
+                & (pteropod_list[:,1]%2 == gen)))
+
             if tmp.size == 1:
                 tmp = np.array([tmp])
 
             if tmp.size > 0:
-                num_ind,rate = get_number_individuals(tmp,i,gen,rate_g0_0,rate_g0_1,rate_g0_2,rate_g0_3,
-                                                 rate_g1_0,rate_g1_1,rate_g1_2,rate_g1_3)
+                num_ind,rate = get_number_individuals(tmp,mortality_rate_dict[gen][stage])
 
                 if num_ind > 0:
 #                    ind = np.random.choice(tmp,size=int(num_ind),replace=False)
@@ -196,10 +178,9 @@ def mortality(
 
 
 def mortality_dw(
-        pteropod_list,rate_g0_0=0.211,rate_g0_1=0.09,rate_g0_2=0.09,
-        rate_g0_3=0.09,rate_g1_0=0.142,rate_g1_1=0.01,rate_g1_2=0.01,
-        rate_g1_3=0.01,longevity=390,base1=5.26,exp1=-0.25,base2=5.26,
-        exp2=-0.25,day=None,
+        pteropod_list, mortality_rate_dict, longevity=390,
+        base1=5.26, exp1=-0.25, base2=5.26,
+        exp2=-0.25, day=None,
         outfile='/cluster/scratch/ursho/output_simulation_extremes/mortalities/'):
 
     """Select subsets of the individuals found in pteropod list according to
@@ -211,7 +192,7 @@ def mortality_dw(
     Keyword arguments:
     pteorpod_list -- array containing all state variables characterizing the
         pteropods
-    rate_gX_Y -- beta mortality rates for each stage and generation
+    mortality_rate_dict -- beta mortality rates for each stage and generation
     longevity -- maximum longevity
     baseX -- base of equation used to calculate the dry weight specific
         mortality for the X generation
@@ -220,8 +201,8 @@ def mortality_dw(
     day -- list containing year, version, day and control for saving causes for
         mortalitites (background, old age, spawning,...; default None)
     outfile -- output directory
-
     """
+
     num_dead_nat = 0
     num_dead_dis = 0
     num_dead_old = 0
@@ -230,7 +211,7 @@ def mortality_dw(
     all_delta_rates = np.array([])
     all_rates = np.array([])
     all_tmps = np.array([])
-    for gen in range(2):
+    for gen in mortality_rate_dict.keys():
 #         for i in range(4):
         tmp = np.squeeze(np.argwhere(pteropod_list[:,1]%2 == gen))
         if tmp.size == 1:
@@ -238,17 +219,16 @@ def mortality_dw(
 
         if tmp.size > 0:
 
-            num_ind,rate_eggs = get_number_individuals(tmp,0,gen,rate_g0_0,rate_g0_1,rate_g0_2,rate_g0_3,
-                                                 rate_g1_0,rate_g1_1,rate_g1_2,rate_g1_3)
+            num_ind,rate_eggs = get_number_individuals(tmp,mortality_rate_dict[gen]['0'])
 
             flag_eggs = np.squeeze(np.argwhere(pteropod_list[tmp,2] == 0))
 
-            DW = (0.137*pteropod_list[tmp,3]**1.5005)/1000
+            dry_weight = (0.137*pteropod_list[tmp,3]**1.5005)/1000
             if gen == 0:
-                rate = base1/1000 * DW**(exp1)
+                rate = base1/1000 * dry_weight**(exp1)
 
             else:
-                rate = base2/1000 * DW**(exp2)
+                rate = base2/1000 * dry_weight**(exp2)
 
             if sum(flag_eggs) > 0:
                 rate[flag_eggs] = rate_eggs
@@ -323,8 +303,7 @@ def mortality_dw(
         if not os.path.exists(outfile_mort):
             os.makedirs(outfile_mort)
         array_save = np.array([num_dead_nat,num_dead_dis,num_dead_old])
-#        print(array_save.shape)
-#        print(array_save)
+
         np.savetxt(outfile_mort+'Mortality_type_Day_{}.csv'.format(int(day[2])), array_save, delimiter=',')
 
     return dead_particles,new_pteropod_list
@@ -333,22 +312,23 @@ def mortality_dw(
 
 
 
-def calculate_shell_carbonate(L):
+def calculate_shell_carbonate(length):
     """This function calculates the calcium carbonate content in the shell of
     a pteropod. The function is taken from Bednarsek et al., Deep Sea Research
     Part 2 59: 105-116 (2012). Returns the calcium carbonate content in mg
     CaCO3 on position 0 and the dry weight in mg DW on position 1. UHE 25/09/2020
 
     Keyword arguments:
-    L -- Shell size in mm
+    length -- Shell size in mm
 
     """
-    DW = (0.137*L**1.5005)
-    Shell_calc = DW*0.25*0.27*8.33
+    dry_weight = (0.137*length**1.5005)
+    shell_calc = dry_weight*0.25*0.27*8.33
 
-    return Shell_calc,DW
+    return shell_calc, dry_weight
 
-def calculate_dissolution_calcification(L,damage,delta_L,Arag,gain_flag=0):
+def calculate_dissolution_calcification(
+        length, damage, delta_length, aragonite):
     """This function calculates the loss and gain of CaCO3 given the current
     size, growth function, and exposure to aragonite saturation states. The
     function first determines the dissolution, and compares it to the calcium
@@ -360,54 +340,43 @@ def calculate_dissolution_calcification(L,damage,delta_L,Arag,gain_flag=0):
 
 
     Keyword arguments:
-    L -- Shell size in mm
+    length -- Shell size in mm
     damage -- Current accumulated damage in mg CaCO3
-    delta_L -- Current increase in size under idealized conditions in mm
-    Arag -- Aragonite saturation state experienced by pteropod
-    gain_flag -- Identifier to determine if additional calcifiction should be
-        considered
-
+    delta_length -- Current increase in size under idealized conditions in mm
+    aragonite -- Aragonite saturation state experienced by pteropod
     """
     #ensure the input is an array even if scalars are given as input
-    Ln = np.asarray([L]) if np.isscalar(L) or L.ndim == 0 else np.asarray(L)
+    lengthn = np.asarray([length]) if np.isscalar(length) or length.ndim == 0 else np.asarray(length)
     damagen = np.asarray([damage]).astype(np.float64) if np.isscalar(damage) or damage.ndim == 0 else np.asarray(damage).astype(np.float64)
-    delta_Ln = np.asarray([delta_L]) if np.isscalar(delta_L) or delta_L.ndim == 0  else np.asarray(delta_L)
-    Aragn = np.asarray([Arag]) if np.isscalar(Arag) or Arag.ndim == 0  else np.asarray(Arag)
+    delta_lengthn = np.asarray([delta_length]) if np.isscalar(delta_length) or delta_length.ndim == 0  else np.asarray(delta_length)
+    aragoniten = np.asarray([aragonite]) if np.isscalar(aragonite) or aragonite.ndim == 0  else np.asarray(aragonite)
 
-    Shell_calc,DW = calculate_shell_carbonate(Ln)
+    shell_calc, _ = calculate_shell_carbonate(lengthn)
 
-    loss = 65.76 * np.exp(-4.7606*Aragn)*Shell_calc/100
+    loss = 65.76 * np.exp(-4.7606*aragoniten)*shell_calc/100
 
-    zero = np.zeros(L.size)
-    L_new = Ln.copy()
-    Shell_new = Ln.copy()*0.0
+    zero = np.zeros(length.size)
+    length_new = lengthn.copy()
+    shell_new = lengthn.copy()*0.0
 
-    #Calculate calcification at size L
-    if gain_flag == 1:
-        WW = DW/(0.28*1000) #in g
-        Q = (0.57*np.log(Aragn)+0.25)/1000000  #in mol/(g ww h)
-        Molar_mass = 100.0869 #in g/mol
-        f_day = 24 #hours per day
-        gain = Q*WW*Molar_mass*f_day*1000
-        loss = np.amax([loss-gain,zero],axis=0)
+    length_potential = lengthn + delta_lengthn
+    shell_calc_new, _ = calculate_shell_carbonate(length_potential)
 
-    L_pot = Ln+delta_Ln
-    Shell_calc_new,DW = calculate_shell_carbonate(L_pot)
-
-    net = Shell_calc_new - Shell_calc - loss
+    net = shell_calc_new - shell_calc - loss
 
     flag_smaller_damage = net > damagen
     if np.sum(flag_smaller_damage) > 0:
-        Shell_new[flag_smaller_damage] = Shell_calc[flag_smaller_damage] + net[flag_smaller_damage] - damagen[flag_smaller_damage]
-        L_new[flag_smaller_damage] = (Shell_new[flag_smaller_damage]/(0.25*0.27*8.33*0.137))**(1/float(1.5005))
+        shell_new[flag_smaller_damage] = shell_calc[flag_smaller_damage] + net[flag_smaller_damage] - damagen[flag_smaller_damage]
+        length_new[flag_smaller_damage] = (shell_new[flag_smaller_damage]/(0.25*0.27*8.33*0.137))**(1/float(1.5005))
     damagen = np.max([zero,damagen-net],axis=0)
 
-    return L_new,damagen
+    return length_new, damagen
 
 
 def shell_growth(
-        pteropod_list,growth_fct_gen0,Arag=4,T=16,F=7,T0=14.5,
-        Ks=4.8,Tmax=31,Tmin=0.6,day=None,
+        pteropod_list, growth_fct_gen0, aragonite=4, temperature=16, food=7,
+        temperature_ref=14.5, half_sat_food=4.8, temperature_max=31,
+        temperature_min=0.6, day=None,
         outfile='/cluster/scratch/ursho/output_simulation_extremes/Growth/'):
     """This function determines the net shell growth given the aragonite
     saturation state, current size, and generation. Returns array
@@ -424,7 +393,7 @@ def shell_growth(
         simulate optimal conditions
     T0 -- Refernce temperature for the growth rate. Default value set to 14.5
         according to Wang et al. 2017
-    Ks -- Food/Phytoplankton carbon half-saturation constant. The default
+    half_sat_food -- Food/Phytoplankton carbon half-saturation constant. The default
         value is set to 2.6
     Tmax -- Maximum temperature for growth
     Tmin -- Minimum temperature for growth
@@ -436,9 +405,9 @@ def shell_growth(
     #If dissolution is turned off, then create array with experienced aragonite saturation states
     #that are too high (4) to not have an effect on shell growth
 
-    if np.ndim(Arag) == 0: #changed
+    if np.ndim(aragonite) == 0: #changed
         #only happens if there is no input
-        Arag = pteropod_list[:,5].copy()*Arag
+        aragonite = pteropod_list[:,5].copy()*aragonite
 
     list_days_of_growth = np.arange(pteropod_list.shape[0])
     #increase shell size according to temp and food, UHE 17/03/2021
@@ -453,22 +422,22 @@ def shell_growth(
         growth_rate = np.array(growth_rate)
 
         #current length
-        L = pteropod_list[list_days_of_growth,3]
+        length = pteropod_list[list_days_of_growth,3]
         #ensure the structure of L is correct if there is only one pteropod or multiple pteropods
-        if L.shape[0] != 1:
-            L = np.squeeze(L)
+        if length.shape[0] != 1:
+            length = np.squeeze(length)
         #calculate distance to reference and find index with minimum distance
-        pos_idx = np.array([np.squeeze(np.argwhere(abs(growth_fct_gen0-i) == abs(growth_fct_gen0-i).min())) for i in L])
+        pos_idx = np.array([np.squeeze(np.argwhere(abs(growth_fct_gen0 - i) == abs(growth_fct_gen0 - i).min())) for i in length])
 
-        food_effect = F/(Ks+F)
+        food_effect = food/(half_sat_food + food)
 
-        rate = growth_rate[pos_idx]*1.3**((T-T0)/10) * food_effect
+        rate = growth_rate[pos_idx]*1.3**((temperature - temperature_ref)/10) * food_effect
         #Add thresholds of max and min temp
-        rate[(T>Tmax)|(T<Tmin)] = 0
-        delta_L = rate*L
+        rate[(temperature>temperature_max) | (temperature<temperature_min)] = 0
+        delta_length = rate*length
 
         damage = np.squeeze(pteropod_list[list_days_of_growth,14])
-        pteropod_list[list_days_of_growth,3],pteropod_list[list_days_of_growth,14]  = calculate_dissolution_calcification(L,damage,delta_L,Arag[list_days_of_growth])
+        pteropod_list[list_days_of_growth,3],pteropod_list[list_days_of_growth,14]  = calculate_dissolution_calcification(length,damage,delta_length,aragonite[list_days_of_growth])
 
         #==========================================================
         # Save rate, delta_L, T, F, damage, UHE 02/06/2021
@@ -476,7 +445,7 @@ def shell_growth(
         if day is not None:
             assert len(day) == 4, "The argument 'day' should contain year, version, day, and control"
             #save variables as csv file
-            array_save = np.array([rate,delta_L,damage,T,F])
+            array_save = np.array([rate,delta_length, damage, temperature, food])
             outfile_growth = outfile+'year_{}_V_{}_control_{}/'.format(day[0],day[1],day[3])
             if not os.path.exists(outfile_growth):
                 os.makedirs(outfile_growth)
@@ -484,7 +453,7 @@ def shell_growth(
 
     return pteropod_list
 
-def development(pteropod_list,growth_fct_gen0):
+def development(pteropod_list, growth_fct_gen0):
     """This function determines the life stage depending on the size of the
     pteropods. And increases the growth time by one day. Returns array
     containing updated attributes characterizing the pteropods. UHE 25/09/2020
@@ -501,11 +470,11 @@ def development(pteropod_list,growth_fct_gen0):
     pteropod_list[np.squeeze(np.where(pteropod_list[:,3] >= growth_fct_gen0[90])).astype(int),2] = 3
 
     #increase days of growth if they survive
-    pteropod_list[:,4] = pteropod_list[:,4] + 1
+    pteropod_list[:,4] += 1
 
     return pteropod_list
 
-def spawning(pteropod_list, current_generation,next_ID,num_eggs=500,delta_ERR=20):
+def spawning(pteropod_list, current_generation, next_id, num_eggs=500, delta_ERR=20):
     """This function subsets the adult pteropods of a given generation, and
     determines which pteropods are ready to spawn eggs. Returns the array
     containing the updated attributes characterizing the pteropods, the next
@@ -544,8 +513,8 @@ def spawning(pteropod_list, current_generation,next_ID,num_eggs=500,delta_ERR=20
             #for each entry in adult, create egg more entries
             #get the generation, Parent_ID, Shell_size, time_of_birth
             generation = np.squeeze(pteropod_list[adults_ind,1])
-            Parent_ID = np.squeeze(pteropod_list[adults_ind,0])
-            Parent_shell_size = np.squeeze(pteropod_list[adults_ind,3])
+            parent_id = np.squeeze(pteropod_list[adults_ind,0])
+            parent_shell_size = np.squeeze(pteropod_list[adults_ind,3])
             time_birth = np.squeeze(pteropod_list[adults_ind,12])
 
             eggs = np.random.rand(adults_ind.size, 17)
@@ -568,9 +537,9 @@ def spawning(pteropod_list, current_generation,next_ID,num_eggs=500,delta_ERR=20
             #spawned
             eggs[:,8] = 0
             #Parent_ID
-            eggs[:,9] = Parent_ID
+            eggs[:,9] = parent_id
             #Parent_shell_size
-            eggs[:,10] = Parent_shell_size
+            eggs[:,10] = parent_shell_size
             #time_birth
             eggs[:,11] = -1
             #current_time
@@ -585,17 +554,17 @@ def spawning(pteropod_list, current_generation,next_ID,num_eggs=500,delta_ERR=20
             eggs[:,16] = 0
 
             egg_list = np.repeat(eggs, repeats=int(num_eggs/(idx+1)), axis=0)
-            egg_list[:,0] = np.arange(next_ID,next_ID+egg_list.shape[0])
+            egg_list[:,0] = np.arange(next_id, next_id + egg_list.shape[0])
 
             pteropod_list = np.concatenate((pteropod_list,egg_list))
-            next_ID = max(pteropod_list[:,0])+1
+            next_id= max(pteropod_list[:,0])+1
             pteropod_list[adults_ind,6] = 1
 
-    return pteropod_list, next_ID, current_generation
+    return pteropod_list, next_id, current_generation
 
 def spawning_gradual(
-        pteropod_list, current_generation,next_ID,max_eggs=500,
-        max_size=3.962,num_eggs_per_size=None,sizes_per_egg=None):
+        pteropod_list, current_generation, next_id, max_eggs=500,
+        max_size=3.962, num_eggs_per_size=None, sizes_per_egg=None):
     """This function subsets the adult pteropods of a given generation, and
     determines which pteropods are ready to spawn eggs.
     The egg production is linked to the size of the pteropods
@@ -650,8 +619,8 @@ def spawning_gradual(
             #for each entry in adult, create egg more entries
             #get the generation, Parent_ID, Shell_size, time_of_birth
             generation = np.squeeze(pteropod_list[ind,1])
-            Parent_ID = np.squeeze(pteropod_list[ind,0])
-            Parent_shell_size = np.squeeze(pteropod_list[ind,3])
+            parent_id = np.squeeze(pteropod_list[ind,0])
+            parent_shell_size = np.squeeze(pteropod_list[ind,3])
             time_birth = np.squeeze(pteropod_list[ind,12])
 
             eggs = np.random.rand(1, 17)
@@ -674,9 +643,9 @@ def spawning_gradual(
             #spawned
             eggs[:,8] = 0
             #Parent_ID
-            eggs[:,9] = Parent_ID
+            eggs[:,9] = parent_id
             #Parent_shell_size
-            eggs[:,10] = Parent_shell_size
+            eggs[:,10] = parent_shell_size
             #time_birth
             eggs[:,11] = -1
             #current_time
@@ -689,17 +658,17 @@ def spawning_gradual(
             eggs[:,15] = 0
             #food
             eggs[:,16] = 0
-            repeats = int(np.round(interp_num_eggs(Parent_shell_size)))
+            repeats = int(np.round(interp_num_eggs(parent_shell_size)))
 
             egg_list = np.repeat(eggs, repeats=repeats, axis=0)
-            egg_list[:,0] = np.arange(next_ID,next_ID+egg_list.shape[0])
+            egg_list[:,0] = np.arange(next_id, next_id + egg_list.shape[0])
 
             pteropod_list = np.concatenate((pteropod_list,egg_list))
-            next_ID = max(pteropod_list[:,0])+1
+            next_id = max(pteropod_list[:,0])+1
             pteropod_list[ind,7] += repeats
             if pteropod_list[ind,7] >= max_eggs:
                 pteropod_list[ind,6] = 1
 
-    return pteropod_list, next_ID, current_generation
+    return pteropod_list, next_id, current_generation
 
 
