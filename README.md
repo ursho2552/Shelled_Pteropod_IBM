@@ -10,7 +10,7 @@ The manuscript detailing the first release of spIBM, has been published in [Ecol
 
 ### Further information
 
-See the example jupyter notebook for more information on running the spIBM code
+See the ECOMOD jupyter notebook for more information on running the spIBM.
 
 
 
