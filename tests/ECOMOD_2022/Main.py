@@ -21,6 +21,11 @@ module = importlib.util.module_from_spec(spec)
 sys.modules[spec.name] = module 
 spec.loader.exec_module(module)
 
+import csv
+import os
+import datetime
+from dataclasses import asdict
+
 from parcels import ParticleSet
 
 sys.path.insert(1,"/net/kryo/work/ursho/PhD/Projects/Pteropod_IBM/Shelled_Pteropod_IBM/")
@@ -28,11 +33,6 @@ import spIBM
 import Project_files
 
 import numpy as np
-import os
-import datetime
-from dataclasses import asdict
-import csv
-
 
 '''
 Main Function
@@ -78,8 +78,8 @@ if __name__ in "__main__":
 #    my_pteropods = spIBM.define_initial_population_dynamic(number_of_individuals=number_of_individuals, number_of_attributes=number_of_attributes, dictionary_of_values=my_attributes)
 #    
     
-    if My_config.flag_calculate_initial_population == True:
-        spIBM.run_IBM_idealized(My_config,my_pteropods,start_gen=0,time=5000,L_t=None,save_population=True,save_abundance=True)
+    if My_config.flag_calculate_initial_population:
+        spIBM.run_ibm_idealized(My_config,my_pteropods,start_gen=0,time=5000,length_t=None,save_population=True,save_abundance=True)
     
     # =========================================================================
     # Determine starting day given the abundances calculated above
@@ -127,7 +127,7 @@ if __name__ in "__main__":
     # =========================================================================
     # Run physics only initialization, and reset times
     # =========================================================================
-    if My_config.flag_run_physics_only == True:
+    if My_config.flag_run_physics_only:
         pset_ptero = spIBM.run_physics_only(My_config, pset_ptero, fieldset, kernel, year, total_runtime=3, dt=1.0, outputdt=1.0)
     
     #always read from file. On the first year calculate the value and then read from file
@@ -170,7 +170,7 @@ if __name__ in "__main__":
         time_mat[1,i] = (d0+datetime.timedelta(days=i)).day
         time_mat[2,i] = i
         
-    pset_ptero.run_IBM_coupled(My_config, pset_ptero, fieldset, pclass, kernel, time_mat, next_ID, current_gen, L_t=None)
+    pset_ptero.run_ibm_coupled(My_config, pset_ptero, fieldset, pclass, kernel, time_mat, next_ID, current_gen, length_t=None)
     
     
     # =========================================================================

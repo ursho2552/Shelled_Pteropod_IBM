@@ -4,9 +4,9 @@
 
 ### spIBM manuscript and code
 
-The manuscript detailing the first release of spIBM, has been published in [Ecologial Modelling](TBD), and can be cited as:
+The manuscript detailing the first release of spIBM, has been published in [Ecologial Modelling](https://doi.org/10.1016/j.ecolmodel.2022.109944), and can be cited as:
 
-*Hofmann Elizondo U. and M. Vogt (2022) Individual-based modelling of shelled pteropods. Ecological Modelling, XX, XXX-XXX. https://doi.org:10.XXXXX*
+*Hofmann Elizondo U. and M. Vogt (2022) Individual-based modelling of shelled pteropods. Ecological Modelling, Volume 468, ISSN 0304-3800, https://doi.org/10.1016/j.ecolmodel.2022.109944*
 
 ### Further information
 
