@@ -1,4 +1,4 @@
-# IBM_config_paths.yaml file
+# IBM configuration
 
 #Created on Thu Mar  3 14:15:12 2022
 
@@ -7,8 +7,8 @@
 data_path: "/nfs/kryo/work/ursho/PhD/Projects/Pteropods/Parcels/Environmental_data/Roms_data/"
 mesh_file: "/nfs/kryo/work/fdesmet/roms/input/pactcs30/pactcs30_grd.nc"
  
-directory_mort: "/nfs/kryo/work/ursho/PhD/Projects/Pteropod_IBM/Analysis/Calibration/Mortality/Results/" #this should not be here
-similarity_file: "Similarity_to_MAREDAT_V25_Part_{}.csv"#this should not be here
+directory_mort: "/nfs/kryo/work/ursho/PhD/Projects/Pteropod_IBM/Analysis/Calibration/Mortality/Results/" 
+similarity_file: "Similarity_to_MAREDAT_V25_Part_{}.csv"
  
 output_dir_initialization: "/home/ursho/PhD/Projects/Pteropod_IBM/Analysis/output_initialization_Test/"
 gen0_file: "Gen0.csv"
@@ -35,8 +35,6 @@ dir_env: "/nfs/kryo/work/ursho/PhD/Projects/Pteropod_IBM/Data/"
 sst_file: "daily_sst.csv"
 food_file: "daily_food.csv"
 
-
-
 velocity_file: "Velocities/time_nco_velocities_pactcs30_{}_avg.nc"
 aragonite_file: "Aragonite/nco_aragonite_pactcs30_{}_avg.nc"
 extreme_file: "Aragonite/250m/control_aragonite_pactcs30_{}_avg.nc"
@@ -46,7 +44,6 @@ chlorophyll_file: "Chlorophyll/nco_chlorophyll_pactcs30_{}_avg.nc"
 depth_file: "Velocities/depth_z_pos.nc"
 unbeach_file: "Velocities/UnBeachVel_Comb.nc"
 mask_file: "Velocities/UnBeachVel_Comb.nc"
-
 
 velocity_U_variable_name: "u"
 velocity_V_variable_name: "v"
@@ -66,14 +63,10 @@ lat_name: "lat_psi"
 depth_name: "depth_Z_w"
 time_name: "time_counter"
 
-
-#class BooleanFlags:
 flag_calculate_initial_population: False
 flag_calculate_initial_positions: True
 flag_run_physics_only: True
     
-#class ModelParameters:
-#control and version should not be here
 control: None
 start_year: 1984
 version: None
