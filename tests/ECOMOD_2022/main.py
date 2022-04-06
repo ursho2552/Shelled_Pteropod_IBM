@@ -44,7 +44,7 @@ if __name__ in "__main__":
     # Read in user input from terminal
     # =========================================================================
     year, version, control, config_file = spIBM.parse_inputs()
-    
+
     # =========================================================================
     # Read YAML file with all parameter values and fill in the control and
     # version field
@@ -57,7 +57,7 @@ if __name__ in "__main__":
     # Read environment
     # =========================================================================
     fieldset = spIBM.read_environment(My_config, year, My_config.control)
-    
+
     # =========================================================================
     # Calculate initial idealized population
     # =========================================================================
