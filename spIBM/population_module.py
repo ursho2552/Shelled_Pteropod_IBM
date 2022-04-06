@@ -50,10 +50,7 @@ def get_number_individuals(indeces, rate_generation_stage):
 
     Keyword arguments:
     indeces -- list of indeces of a specific stage in the population
-    stage -- integer identifier for the life stage
-    generation -- integer identifier for the generation, 0 for spring, 1 for
-        winter
-    rate_gX_Y -- beta survival rates for each stage and generation
+    rate_generation_stage -- beta survival rates for a stage and generation
     """
 
     rate = np.exp(-rate_generation_stage)
@@ -309,9 +306,6 @@ def mortality_dw(
     return dead_particles,new_pteropod_list
 
 
-
-
-
 def calculate_shell_carbonate(length):
     """This function calculates the calcium carbonate content in the shell of
     a pteropod. The function is taken from Bednarsek et al., Deep Sea Research
@@ -485,7 +479,7 @@ def spawning(pteropod_list, current_generation, next_id, num_eggs=500, delta_ERR
         pteropods
     current_generation -- Identifier of the current generation that will spawn
         the next generation
-    next_ID -- The largest ID + 1 out of the entire population
+    next_id -- The largest ID + 1 out of the entire population
     num_eggs -- Number of eggs spawned per adult of a single spawning event
     delta_ERR -- increase in the Egg Release Readiness (ERR) index per day as
         1/delta_ERR
@@ -577,7 +571,7 @@ def spawning_gradual(
         pteropods
     current_generation -- Identifier of the current generation that will spawn
         the next generation
-    next_ID -- The largest ID + 1 out of the entire population
+    next_id -- The largest ID + 1 out of the entire population
     max_eggs -- Maximum number of eggs per adult throughout their life time
     max_size -- Maximum size of pteropods (proposed by Reviewer)
     num_eggs_per_size -- list containing the number of eggs produced at a given
