@@ -23,7 +23,7 @@ import numpy as np
 
 sys.path.insert(1,"/net/kryo/work/ursho/PhD/Projects/Pteropod_IBM/Shelled_Pteropod_IBM/")
 import spIBM
-import Project_files
+import project_funcs
 
 
 '''
@@ -100,7 +100,7 @@ if __name__ in "__main__":
     # =========================================================================
     REF_DATA_FILE ="/home/ursho/PhD/Projects/Pteropod_IBM/Data/MarEDat20120203Pteropods.nc"
     daily_abundance_maredat, std_abundance_maredat = \
-        Project_files.get_daily_maredat_obs(ref_data=REF_DATA_FILE)
+        project_funcs.get_daily_maredat_obs(ref_data=REF_DATA_FILE)
 
     directory_mort = My_config.directory_mort
     similarity_file = My_config.similarity_file
@@ -136,7 +136,7 @@ if __name__ in "__main__":
     #file later on
     if My_config.flag_calculate_initial_positions:
         latlon_list = \
-            Project_files.get_initial_positions(num=num_init,
+            project_funcs.get_initial_positions(num=num_init,
                                                 grid_file=grid_file,
                                                 outfile=outfile)
 
