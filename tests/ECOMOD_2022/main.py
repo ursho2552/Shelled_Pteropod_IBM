@@ -25,21 +25,16 @@ sys.path.insert(1,"/net/kryo/work/ursho/PhD/Projects/Pteropod_IBM/Shelled_Pterop
 import spIBM
 import project_funcs
 
+MODULE_PATH = '/home/ursho/PhD/Projects/Pteropods/My_parcels/Parcels_master_copy/parcels/parcels/__init__.py'
+MODULE_NAME = "parcels"
+spec = importlib.util.spec_from_file_location(MODULE_NAME, MODULE_PATH)
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
 
-'''
-Main Function
-'''
-if __name__ in "__main__":
+from parcels import ParticleSet
 
-    MODULE_PATH = '/home/ursho/PhD/Projects/Pteropods/My_parcels/Parcels_master_copy/parcels/parcels/__init__.py'
-    MODULE_NAME = "parcels"
-    spec = importlib.util.spec_from_file_location(MODULE_NAME, MODULE_PATH)
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = module
-    spec.loader.exec_module(module)
-
-    from parcels import ParticleSet
-
+def main():
     # =========================================================================
     # Read in user input from terminal
     # =========================================================================
@@ -102,8 +97,8 @@ if __name__ in "__main__":
     daily_abundance_maredat, std_abundance_maredat = \
         project_funcs.get_daily_maredat_obs(ref_data=REF_DATA_FILE)
 
-    directory_mort = My_config.directory_mort
-    similarity_file = My_config.similarity_file
+#    directory_mort = My_config.directory_mort
+#    similarity_file = My_config.similarity_file
     output_dir = My_config.output_dir_initialization
     gen0_file = My_config.gen0_file
     gen1_file = My_config.gen1_file
@@ -214,7 +209,6 @@ if __name__ in "__main__":
                                kernel, time_mat, next_ID, current_gen,
                                length_t=None)
 
-
     # =========================================================================
     # Save model parameters used for the year
     # =========================================================================
@@ -225,3 +219,10 @@ if __name__ in "__main__":
         w.writerow(Parameters_dict)
 
     sys.exit()
+
+'''
+Main Function
+'''
+if __name__ in "__main__":
+
+    main()

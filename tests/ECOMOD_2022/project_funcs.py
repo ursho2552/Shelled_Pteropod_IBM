@@ -140,3 +140,62 @@ def get_mortality_rates_from_file(directory_mort,similarity_file):
     b = np.argwhere(optimum == max(optimum))[0]
 
     return np.squeeze(similarity_mat[b[0],0:8])
+
+
+def calculate_timings(L_t_spring,day_start,daily_sst,daily_npp,T0=14.5,Ks=3,dt=20):
+
+    rates_all = [(L_t_spring[i] - L_t_spring[i-1])/L_t_spring[i-1] for i in range(1,len(L_t_spring))]
+    rates_all.insert(0,rates_all[0])
+    rates_all.append(rates_all[-1])
+
+    new_rate = list()
+    length_q2 = list()
+    
+    T0 = T0
+    Ks = Ks
+    day_start = day_start
+    length_q2.append(0.15)
+    
+    spring_t = np.arange(day_start, day_start + 329)%365
+    spring_T = daily_sst[spring_t]
+    spring_F = daily_npp[spring_t]
+    rate_ref = rates_all[0]
+    
+    for i in np.arange(0,len(spring_t)):
+        
+        Ks_s = Ks 
+        tmp = rate_ref*1.3**((spring_T[i] - T0)/10)*spring_F[i]/(Ks_s + spring_F[i])
+        new_rate.append(tmp)
+        length_q2.append(length_q2[-1]*(1+new_rate[-1]))
+        dist = abs(L_t_spring-length_q2[-1])
+        pos_idx = np.argwhere(dist == min(dist))[0][0]
+        rate_ref = rates_all[pos_idx]
+
+    maturity_time = np.argwhere(length_q2 >= L_t_spring[90])[0]
+    end_mat = maturity_time+dt
+    
+    spring_L = length_q2
+    new_rate = list()
+    length_q2 = list()
+    
+    length_q2.append(0.15)
+    
+    winter_t = np.arange(day_start + end_mat, day_start + end_mat + 500)%365
+    winter_T = daily_sst[winter_t]
+    winter_F = daily_npp[winter_t]
+
+    rate_ref = rates_all[0]
+    
+    for i in np.arange(0,len(winter_t)):
+        
+        Ks_s = Ks 
+        new_rate.append(rate_ref*1.3**((winter_T[i] - T0)/10)*winter_F[i]/(Ks_s + winter_F[i]))
+        length_q2.append(length_q2[-1]*(1 + new_rate[-1]))
+        dist = abs(L_t_spring - length_q2[-1])
+        pos_idx = np.argwhere(dist == min(dist))[0][0]
+        rate_ref = rates_all[pos_idx]
+
+    maturity_time_w = np.argwhere(length_q2 >=L_t_spring[90])[0]
+    winter_L = length_q2
+    
+    return[maturity_time+maturity_time_w,maturity_time,maturity_time_w,spring_L,winter_L]
