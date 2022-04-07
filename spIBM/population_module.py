@@ -85,8 +85,8 @@ def mortality(
     all_rates = np.array([])
     all_tmps = np.array([])
 
-    for gen in mortality_rate_dict.keys():
-        for stage in mortality_rate_dict[gen].keys():
+    for gen in mortality_rate_dict:
+        for stage in mortality_rate_dict[gen]:
 
             tmp = np.squeeze(np.argwhere((pteropod_list[:,2] == stage)
                 & (pteropod_list[:,1]%2 == gen)))
@@ -153,7 +153,7 @@ def mortality(
     #==========================================================
     # Save rands, rate, dealta_rate, index, UHE 02/06/2021
     #==========================================================
-    if day is not None:
+    if not day is None:
         assert len(day) == 4,"The argument 'day' should have the lenght 4 with the structure (year,version,day,control)"
         #save variables as csv file
         outfile_mort = outfile+'year_{}_V_{}_control_{}/'.format(day[0],day[1],day[3])
@@ -436,7 +436,7 @@ def shell_growth(
         #==========================================================
         # Save rate, delta_L, T, F, damage, UHE 02/06/2021
         #==========================================================
-        if day is not None:
+        if not day is None:
             assert len(day) == 4, "The argument 'day' should contain year, version, day, and control"
             #save variables as csv file
             array_save = np.array([rate,delta_length, damage, temperature, food])
@@ -494,65 +494,65 @@ def spawning(pteropod_list, current_generation, next_id, num_eggs=500, delta_ERR
         current_generation = max(np.unique(available_generations))
 
     #get number of adults in the current generation that can produce eggs
-    for idx in range(1):
+    num_spawnings = 0
     #get number of adults in the current generation that can produce eggs
-        adults_ind = np.squeeze(np.argwhere((pteropod_list[:,2] == 3) &
-                                    (pteropod_list[:,1]%2 == current_generation%2) &
-                                    (pteropod_list[:,7] >= 1.0) &
-                                    (pteropod_list[:,6] == idx))).astype(int)
+    adults_ind = np.squeeze(np.argwhere((pteropod_list[:,2] == 3) &
+                                (pteropod_list[:,1]%2 == current_generation%2) &
+                                (pteropod_list[:,7] >= 1.0) &
+                                (pteropod_list[:,6] == num_spawnings))).astype(int)
 
 
-        #get the total number of new eggs(particles)
-        if adults_ind.size > 0:
-            #for each entry in adult, create egg more entries
-            #get the generation, Parent_ID, Shell_size, time_of_birth
-            generation = np.squeeze(pteropod_list[adults_ind,1])
-            parent_id = np.squeeze(pteropod_list[adults_ind,0])
-            parent_shell_size = np.squeeze(pteropod_list[adults_ind,3])
-            time_birth = np.squeeze(pteropod_list[adults_ind,12])
+    #get the total number of new eggs(particles)
+    if adults_ind.size > 0:
+        #for each entry in adult, create egg more entries
+        #get the generation, Parent_ID, Shell_size, time_of_birth
+        generation = np.squeeze(pteropod_list[adults_ind,1])
+        parent_id = np.squeeze(pteropod_list[adults_ind,0])
+        parent_shell_size = np.squeeze(pteropod_list[adults_ind,3])
+        time_birth = np.squeeze(pteropod_list[adults_ind,12])
 
-            eggs = np.random.rand(adults_ind.size, 17)
-            #ID
-            eggs[:,0] = -1
-            #generation
-            eggs[:,1] = generation+1
-            #stage
-            eggs[:,2] = 0
-            #shell_size
-            eggs[:,3] = 0.15
-            #days_of_growth
-            eggs[:,4] = 0
-            #survive
-            eggs[:,5] = 1
-            #num. spawning events
-            eggs[:,6] = 0
-            #ERR distribution around -1 and std 0.1
-            eggs[:,7] = np.random.normal(-1,0.1,adults_ind.size)
-            #spawned
-            eggs[:,8] = 0
-            #Parent_ID
-            eggs[:,9] = parent_id
-            #Parent_shell_size
-            eggs[:,10] = parent_shell_size
-            #time_birth
-            eggs[:,11] = -1
-            #current_time
-            eggs[:,12] = time_birth
-            #aragonite, but used as parent index in matrix
-            eggs[:,13] = adults_ind
-            #damage accumulated
-            eggs[:,14] = 0
-            #temperature
-            eggs[:,15] = 0
-            #food
-            eggs[:,16] = 0
+        eggs = np.random.rand(adults_ind.size, 17)
+        #ID
+        eggs[:,0] = -1
+        #generation
+        eggs[:,1] = generation+1
+        #stage
+        eggs[:,2] = 0
+        #shell_size
+        eggs[:,3] = 0.15
+        #days_of_growth
+        eggs[:,4] = 0
+        #survive
+        eggs[:,5] = 1
+        #num. spawning events
+        eggs[:,6] = 0
+        #ERR distribution around -1 and std 0.1
+        eggs[:,7] = np.random.normal(-1,0.1,adults_ind.size)
+        #spawned
+        eggs[:,8] = 0
+        #Parent_ID
+        eggs[:,9] = parent_id
+        #Parent_shell_size
+        eggs[:,10] = parent_shell_size
+        #time_birth
+        eggs[:,11] = -1
+        #current_time
+        eggs[:,12] = time_birth
+        #aragonite, but used as parent index in matrix
+        eggs[:,13] = adults_ind
+        #damage accumulated
+        eggs[:,14] = 0
+        #temperature
+        eggs[:,15] = 0
+        #food
+        eggs[:,16] = 0
 
-            egg_list = np.repeat(eggs, repeats=int(num_eggs/(idx+1)), axis=0)
-            egg_list[:,0] = np.arange(next_id, next_id + egg_list.shape[0])
+        egg_list = np.repeat(eggs, repeats=int(num_eggs/(num_spawnings+1)), axis=0)
+        egg_list[:,0] = np.arange(next_id, next_id + egg_list.shape[0])
 
-            pteropod_list = np.concatenate((pteropod_list,egg_list))
-            next_id= max(pteropod_list[:,0])+1
-            pteropod_list[adults_ind,6] = 1
+        pteropod_list = np.concatenate((pteropod_list,egg_list))
+        next_id= max(pteropod_list[:,0])+1
+        pteropod_list[adults_ind,6] = 1
 
     return pteropod_list, next_id, current_generation
 

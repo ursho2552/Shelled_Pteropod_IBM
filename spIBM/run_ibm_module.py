@@ -87,9 +87,9 @@ def run_ibm_idealized(
     day_start = config_param.day_start_initial_eggs
     temperature_ref = config_param.T0
     half_sat_food = config_param.Ks
+    
+    length_t = length_t or population_module.calculate_growth_fct()
 
-    if length_t is None:
-        length_t = population_module.calculate_growth_fct()
     tbar = trange(1,time, leave=True)
     for i in tbar:
         #define optimal conditions
@@ -208,8 +208,7 @@ def run_ibm_coupled(
     half_sat_food = config_param.Ks
     temperature_ref = config_param.T0
 
-    if length_t is None:
-        length_t = population_module.calculate_growth_fct()
+    length_t = length_t or population_module.calculate_growth_fct()
 
     flag_init = 1
     day_counter = 0
@@ -351,9 +350,8 @@ def run_physics_only(
 
     assert dt <= 24, \
         "The sub time-step should be smaller than the model time-step (1 day)"
-
-    if outputdt is None:
-        outputdt = dt
+        
+    outputdt = outputdt or dt
 
     if not os.path.exists(config_param.output_dir_physics):
         os.makedirs(config_param.output_dir_physics)

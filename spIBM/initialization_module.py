@@ -315,10 +315,9 @@ def define_initial_population_dynamic(
     assert all(list(dictionary_of_values.keys())== np.arange(number_of_attributes)), \
         "The dictionary keys should be the indeces for the columns (attributes) given as integers"
 
-
     initial_population = np.random.rand(number_of_individuals, number_of_attributes)
 
-    for key in dictionary_of_values.keys():
+    for key in dictionary_of_values:
 
         initial_population[:,key] = dictionary_of_values[key]
 
@@ -409,8 +408,6 @@ def read_attributes_from_file(filename_day_essential,fieldset,pclass):
     extreme = ds_particles.extreme[:,-1].values
     extreme_arag = ds_particles.extreme_arag[:,-1].values
 
-
-
     max_id = np.max(my_id)+1
     current_gen = np.nanmax(generation[np.squeeze(np.argwhere((stage==3) | (shell_size == max(np.unique(shell_size))))).astype(int)])
 
@@ -459,7 +456,7 @@ def reset_particle_attributes(pset,dictionary):
         and values to change
     """
 
-    for key in dictionary.keys():
+    for key in dictionary:
         pset.particle_data[key][:] = dictionary[key]
 
     return pset
@@ -549,10 +546,8 @@ def match_to_observations(data,observations,observations_std,start=None):
 
     assert len(observations) == len(observations_std), \
     "The observations and the observations_std should have the same size"
-
-    if start is None:
-        start = int(data.shape[0]*2/3)
-
+    
+    start = start or int(data.shape[0]*2/3)
 
     std = abs(observations-observations_std)
     min_daily_abundance_unit = (observations - std)/max(observations)
