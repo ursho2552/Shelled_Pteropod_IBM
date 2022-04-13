@@ -7,6 +7,7 @@ Scripts used for the Shelled pteropod IBM project ECOMOD
 """
 
 import glob
+import logging
 import numpy as np
 import xarray as xr
 from scipy import interpolate
@@ -61,7 +62,7 @@ def get_initial_positions(num=1500,
     mask_new = np.reshape(mask_vals,(-1,1))
     mask_vals_orig = np.reshape(mask_vals_orig,(-1,1))
 
-    print('Searching for positions...')
+    logging.info('Searching for positions...')
 
     ind_tmp = np.argwhere((ebus_mask == 1) & (mask_new==max(mask_new)) & (mask_vals_orig==5))
 

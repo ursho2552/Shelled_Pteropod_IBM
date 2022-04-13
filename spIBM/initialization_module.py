@@ -11,12 +11,11 @@ import argparse
 from dataclasses import dataclass
 import scipy.stats
 import yaml
+import logging
 
 from parcels import FieldSet, Field, ParticleSet
 import numpy as np
 import xarray as xr
-
-
 
 
 @dataclass
@@ -236,7 +235,7 @@ def read_environment(Config_param, year,control=0):
     fieldset = FieldSet.from_c_grid_dataset(
             filenames, variables, dimensions,allow_time_extrapolation=False)
 
-    print('Adding lower and upper bounds...')
+    logging.info('Adding lower and upper bounds...')
     fieldset.add_field(Field(
             'bottom_depth', fieldset.Mydepth.depth[-1, :, :], \
             lon=fieldset.Mydepth.grid.lon, lat=fieldset.Mydepth.grid.lat))
@@ -319,7 +318,7 @@ def define_initial_population_dynamic(
 
     for key in dictionary_of_values:
 
-        initial_population[:,key] = dictionary_of_values[key]
+        initial_population[:,int(key)] = dictionary_of_values[key]
 
     return initial_population
 
@@ -349,16 +348,15 @@ def determine_starting_day(
     cycle1 = stage_1[1:4,:]
     cycle0 = stage_0[1:4,:]
     data = np.sum(cycle1,axis=0)+np.sum(cycle0,axis=0)
+    
+    logging.info('Matching to observations')
+    best_mean,best_rolling,start_day,max_Pearson,max_Spearman,min_rmse,outside_range = match_to_observations(data,observations,observations_std,start=start)
 
-    print('Matching to observations...')
-    best_mean,best_rolling,start_day,max_pearson,max_spearman,min_manhattan,outside_range = match_to_observations(data,observations,observations_std,start=start)
+    logging.info('The following metrics were found:')
+    logging.info(f'{np.round(start_day)}, {np.round(max_Spearman,2)}, {np.round(max_Pearson,2)}, {np.round(min_rmse,2)}, {np.round(outside_range,2)}')
 
+    logging.info(f'Start day is: {start_day}')
 
-
-    print('The following metrics were found:')
-    print(start_day,max_spearman,max_pearson,min_manhattan,outside_range)
-
-    print('Start day is: {}'.format(start_day))
 
     if best_mean_rolling is True:
         return start_day, best_mean, best_rolling
@@ -457,6 +455,7 @@ def reset_particle_attributes(pset,dictionary):
     """
 
     for key in dictionary:
+        
         pset.particle_data[key][:] = dictionary[key]
 
     return pset

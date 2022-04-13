@@ -35,9 +35,10 @@ dir_env: "/nfs/kryo/work/ursho/PhD/Projects/Pteropod_IBM/Data/"
 sst_file: "daily_sst.csv"
 food_file: "daily_food.csv"
 
+
 velocity_file: "Velocities/time_nco_velocities_pactcs30_{}_avg.nc"
 aragonite_file: "Aragonite/nco_aragonite_pactcs30_{}_avg.nc"
-extreme_file: "Aragonite/250m/control_aragonite_pactcs30_{}_avg.nc"
+extreme_file: "Aragonite/Absolute_threshold_V5/control_aragonite_pactcs30_{}_avg.nc"
 oxygen_file: "Oxygen/nco_oxygen_pactcs30_{}_avg.nc"
 temperature_file: "Temperature/nco_temp_pactcs30_{}_avg.nc"
 chlorophyll_file: "Chlorophyll/nco_chlorophyll_pactcs30_{}_avg.nc"

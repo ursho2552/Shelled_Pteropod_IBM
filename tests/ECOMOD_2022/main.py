@@ -18,7 +18,7 @@ import datetime
 import importlib
 import os
 import sys
-
+import logging
 import numpy as np
 
 sys.path.insert(1,"/net/kryo/work/ursho/PhD/Projects/Pteropod_IBM/Shelled_Pteropod_IBM/")
@@ -171,7 +171,7 @@ def main():
                         'stage': initial_population[:,2],
                         'shell_size': initial_population[:,3],
                         'days_of_growth': initial_population[:,4],
-                        'survival': initial_population[:,5],
+                        'survive': initial_population[:,5],
                         'num_spawning_event': initial_population[:,6],
                         'ERR': initial_population[:,7],
                         'spawned': initial_population[:,8],
@@ -180,16 +180,15 @@ def main():
                         'damage': initial_population[:,14]}
 
     pset_ptero = spIBM.reset_particle_attributes(pset_ptero,
-                                                 initial_population,
                                                  reset_dictionary)
 
     # =========================================================================
     # Run coupled model
     # =========================================================================
-    print('Starting simulation...')
+    logging.info('Starting simulation...')
     next_ID = max(initial_population[:,0])+1
-    print('Shape initial:', initial_population.shape)
-    print('Next ID is {}'.format(next_ID))
+    logging.info('Shape initial:', initial_population.shape)
+    logging.info('Next ID is {}'.format(next_ID))
 
     oldest_life_stage = initial_population[:,2] == 3
     largest_individual = initial_population[:,3] == max(np.unique(initial_population[:,3]))

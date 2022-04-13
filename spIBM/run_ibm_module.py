@@ -9,6 +9,7 @@ import os
 import datetime
 from pathlib import Path
 import numpy as np
+import logging
 
 from parcels import ErrorCode
 from tqdm import tqdm, trange
@@ -269,7 +270,7 @@ def run_ibm_coupled(
         tbar.set_description(f'Day {day_counter}: Growth')
         tbar.refresh
         if my_data.shape[0] < 1:
-            print('All pteropods are dead')
+            logging.warning('All pteropods are dead')
             break
 
         mean_food = np.squeeze(my_data[:,16])
@@ -281,12 +282,13 @@ def run_ibm_coupled(
             population_module.shell_growth(my_data,
                                            length_t,
                                            aragonite=np.squeeze(my_data[:,13]),
-                                           T=np.squeeze(my_data[:,15]),
+                                           temperature=np.squeeze(my_data[:,15]),
                                            food=food_scaled,
                                            temperature_ref=temperature_ref,
                                            half_sat_food=half_sat_food,
                                            day=day_vec, outfile=outfile_growth)
-
+            
+            
         tbar.set_description(f'Day {day_counter}: Development')
         tbar.refresh
         my_data = population_module.development(my_data,length_t)
@@ -361,7 +363,7 @@ def run_physics_only(
         filename_day = config_param.output_dir_physics \
                        + config_param.physics_only_file.format(i)
 
-        pset = coupler_module.prepare_particles(pset,fieldset,year)
+        pset = coupler_module.prepare_particles(pset,year)
 
         outfile = None if outputdt is False else pset.ParticleFile(name=filename_day, outputdt=datetime.timedelta(hours=outputdt))
 

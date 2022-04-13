@@ -9,7 +9,7 @@ the modeled pteropods
 import os
 import numpy as np
 import scipy
-
+import logging
 
 def calculate_growth_fct():
     """Calculate the shell size of pteropods as a function of their age.
@@ -87,14 +87,15 @@ def mortality(
 
     for gen in mortality_rate_dict:
         for stage in mortality_rate_dict[gen]:
-
-            tmp = np.squeeze(np.argwhere((pteropod_list[:,2] == stage)
-                & (pteropod_list[:,1]%2 == gen)))
-
+            
+            tmp = np.squeeze(np.argwhere((pteropod_list[:,2] == int(stage))
+                & (pteropod_list[:,1]%2 == int(gen))))
+            
             if tmp.size == 1:
                 tmp = np.array([tmp])
 
             if tmp.size > 0:
+                
                 num_ind,rate = get_number_individuals(tmp,mortality_rate_dict[gen][stage])
 
                 if num_ind > 0:
@@ -585,7 +586,7 @@ def spawning_gradual(
 
     #define number of eggs
     if (num_eggs_per_size is None) or (sizes_per_egg is None):
-        print("The keyword 'num_eggs_per_size' and 'sizes_per_egg' have to be declared, otherwise a default value is used.")
+        logging.warning("The keyword 'num_eggs_per_size' and 'sizes_per_egg' have to be declared, otherwise a default value is used.")
         num_eggs_per_size = np.array([0,1,2,4,8,16,32,64,128,256])
         sizes_per_egg = np.linspace(3.64,3.962,10)
     else:

@@ -10,7 +10,7 @@ import datetime
 
 from parcels import ParticleSet
 import numpy as np
-
+import logging
 
 
 
@@ -48,6 +48,7 @@ def calculate_sunrise_sunset(
     """
 
     #define origin time 12:05 is given by ROMS output!
+    
     origin = datetime.datetime(year, 1, 1) \
              + datetime.timedelta(hours=12) \
              + datetime.timedelta(minutes=5)
@@ -111,9 +112,9 @@ def calculate_sunrise_sunset(
     cosh_below = cosh < -1
     cosh_outside_range = (cosh > 1) + (cosh < -1)
     if cosh_above.sum() >  0:
-        print('The sun never rises on some location (on the specified date)')
+        logging.warning('The sun never rises on some location (on the specified date)')
     if cosh_below.sum() > 0:
-        print('The sun never sets on some location (on the specified date)')
+        logging.warning('The sun never sets on some location (on the specified date)')
 
     while cosh_outside_range.sum() > 0:
         negative_lat = latitude < 0
@@ -171,7 +172,7 @@ def prepare_particles(
     lats = pset.particle_data['lat'][:]
     lons = pset.particle_data['lon'][:]
     current_time = pset[0].time
-
+    
     sunset_seconds = calculate_sunrise_sunset(
             lats, lons, year, current_time, rising_time=0, setting_time=1,
             local_offset=-7, backwards=backwards)
@@ -316,7 +317,7 @@ def update_particleset(
     idx_survivors = np.squeeze(np.isin(ids_pset,ids_mat))
 
     idx_newcomers = np.squeeze(~np.isin(ids_mat,ids_pset))
-    ind_mat = idx_newcomers is False
+    ind_mat =  np.invert(idx_newcomers)
 
     # update the values of the survivors
     arrival_time = sunset_seconds
