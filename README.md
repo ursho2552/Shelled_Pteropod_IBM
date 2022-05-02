@@ -1,6 +1,6 @@
 ## Shelled Pteropod Individual-Based Model (spIBM)
 
-**spIBM** is a set of Python classes and methods to simulate the mortality, growth, development and behaviour (diel vertical migration, spawning) of shelled pteropods individuals across different life-stages. The model uses the size as a key trait to determine the behaviour and movement of individuals. The movement is simulated using the Python package parcels v2.1.3 (DOI: 10.5281/zenodo.5196084)
+**spIBM** is a set of Python classes and methods to simulate the mortality, growth, development and behaviour (diel vertical migration, spawning, active avoidance of low oxygen) of shelled pteropods across different life-stages. The model uses the size as a key trait to determine the behaviour and movement of individuals. The movement is simulated using the Python package parcels v2.1.3 (DOI: 10.5281/zenodo.5196084)
 
 ### spIBM manuscript and code
 
