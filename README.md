@@ -12,5 +12,6 @@ The manuscript detailing the first release of spIBM, has been published in [Ecol
 
 See the [ECOMOD test jupyter notebook](tests/ECOMOD_2022/IBM_test.ipynb) for a guide to run the spIBM.
 
-![Simulated pteropod abundnaces for one-year simulations of the period between 1984-2019](https://github.com/ursho2552/Shelled_Pteropod_IBM/blob/main/data/Simulation_Abundances.gif)
+![](https://github.com/ursho2552/Shelled_Pteropod_IBM/blob/main/data/Simulation_Abundances.gif)
+*Simulated pteropod abundances for one-year simulations of the period between 1984-2019 in the California Current System*
 
