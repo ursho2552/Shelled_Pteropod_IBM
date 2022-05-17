@@ -134,8 +134,8 @@ def main():
             project_funcs.get_initial_positions(num=num_init,
                                                 grid_file=grid_file,
                                                 outfile=outfile)
-
-    latlon_list = np.genfromtxt(outfile, delimiter=',')
+    with open(outfile, mode='r') as file:
+        latlon_list = np.array([np.array(line).astype(float) for line in csv.reader(file)])
 
     # =========================================================================
     # Initialize particles and kernel

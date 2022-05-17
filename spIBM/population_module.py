@@ -209,9 +209,9 @@ def mortality_dw(
     all_delta_rates = np.array([])
     all_rates = np.array([])
     all_tmps = np.array([])
-    for gen in mortality_rate_dict.keys():
+    for gen in mortality_rate_dict:
 #         for i in range(4):
-        tmp = np.squeeze(np.argwhere(pteropod_list[:,1]%2 == gen))
+        tmp = np.squeeze(np.argwhere(pteropod_list[:,1]%2 == int(gen)))
         if tmp.size == 1:
             tmp = np.array([tmp])
 
@@ -448,7 +448,7 @@ def shell_growth(
 
     return pteropod_list
 
-def development(pteropod_list, growth_fct_gen0):
+def development(pteropod_list, growth_fct):
     """This function determines the life stage depending on the size of the
     pteropods. And increases the growth time by one day. Returns array
     containing updated attributes characterizing the pteropods. UHE 25/09/2020
@@ -456,13 +456,34 @@ def development(pteropod_list, growth_fct_gen0):
     Keyword arguments:
     pteropod_list -- Array containing all state variables characterizing the
         pteropods
-    growth_fct_gen0 -- Shell size as function of time
+    growth_fct -- Shell size as function of time
 
     """
     #adapt stages using thresholds
-    pteropod_list[np.squeeze(np.where(pteropod_list[:,3] >= growth_fct_gen0[6])).astype(int),2] = 1
-    pteropod_list[np.squeeze(np.where(pteropod_list[:,3] >= growth_fct_gen0[30])).astype(int),2] = 2
-    pteropod_list[np.squeeze(np.where(pteropod_list[:,3] >= growth_fct_gen0[90])).astype(int),2] = 3
+    pteropod_list[np.squeeze(np.where(pteropod_list[:,3] >= growth_fct[6])).astype(int),2] = 1
+    pteropod_list[np.squeeze(np.where(pteropod_list[:,3] >= growth_fct[30])).astype(int),2] = 2
+    pteropod_list[np.squeeze(np.where(pteropod_list[:,3] >= growth_fct[90])).astype(int),2] = 3
+
+    #increase days of growth if they survive
+    pteropod_list[:,4] += 1
+
+    return pteropod_list
+
+def development_dynamic(pteropod_list, stages_dictionary):
+    """This function determines the life stage depending on the size of the
+    pteropods. And increases the growth time by one day. Returns array
+    containing updated attributes characterizing the pteropods. (This implementation
+    is slower than the original one for large populations) UHE 03/05/2022
+
+    Keyword arguments:
+    pteropod_list -- Array containing all state variables characterizing the
+        pteropods
+    stages_dictionary -- Dictionary containing the size thresholds for each 
+        life-stage. The Key should be the ID of the life stage.
+
+    """
+    for key in stages_dictionary:
+        pteropod_list[pteropod_list[:,3] >= stages_dictionary[key],2] = key
 
     #increase days of growth if they survive
     pteropod_list[:,4] += 1

@@ -310,8 +310,8 @@ def define_initial_population_dynamic(
     """
 
     assert len(dictionary_of_values) == number_of_attributes, \
-        "The disctionary must contain values for each attribute"
-    assert all(list(dictionary_of_values.keys())== np.arange(number_of_attributes)), \
+        "The dictionary must contain values for each attribute"
+    assert all(np.array(list(dictionary_of_values.keys())).astype(int) == np.arange(number_of_attributes)), \
         "The dictionary keys should be the indeces for the columns (attributes) given as integers"
 
     initial_population = np.random.rand(number_of_individuals, number_of_attributes)
