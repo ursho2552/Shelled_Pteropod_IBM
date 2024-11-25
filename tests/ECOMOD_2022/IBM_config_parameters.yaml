@@ -4,12 +4,12 @@
 
 #author: ursho
 
-data_path: "/nfs/kryo/work/ursho/PhD/Projects/Pteropods/Parcels/Environmental_data/Roms_data/"
-mesh_file: "/nfs/kryo/work/fdesmet/roms/input/pactcs30/pactcs30_grd.nc"
- 
-directory_mort: "/nfs/kryo/work/ursho/PhD/Projects/Pteropod_IBM/Analysis/Calibration/Mortality/Results/" 
+data_path: "/nfs/kryo/work/ursho/PhD/Projects/spIBM_forcing/environmental_fields/"
+mesh_file: "/nfs/kryo/work/ursho/PhD/Projects/spIBM_forcing/environmental_fields/Velocities/pactcs30_grd.nc"
+
+directory_mort: "/nfs/kryo/work/ursho/PhD/Projects/Pteropod_IBM/Analysis/Calibration/Mortality/Results/"
 similarity_file: "Similarity_to_MAREDAT_V25_Part_{}.csv"
- 
+
 output_dir_initialization: "/home/ursho/PhD/Projects/Pteropod_IBM/Analysis/output_initialization_Test/"
 gen0_file: "Gen0.csv"
 gen1_file: "Gen1.csv"
@@ -20,7 +20,7 @@ reference_abundance_data: "/cluster/home/ursho/kryo_work/ursho/PhD/Projects/Pter
 
 output_dir_physics: "/nfs/kryo/work/ursho/PhD/Projects/Pteropod_IBM/Analysis/output_physics_only_test/"
 physics_only_file: "JitPtero_year_init_Day_{}.nc"
- 
+
 output_dir_simulation_scratch: "/cluster/scratch/ursho/Pteropod_IBM/output/netcdf/"
 outfile_mort_scratch: "/cluster/scratch/ursho/Pteropod_IBM/output/mortalities/"
 outfile_growth_scratch: "/cluster/scratch/ursho/Pteropod_IBM/output/Growth/"
@@ -67,7 +67,7 @@ time_name: "time_counter"
 flag_calculate_initial_population: False
 flag_calculate_initial_positions: True
 flag_run_physics_only: True
-    
+
 control: None
 start_year: 1984
 version: None

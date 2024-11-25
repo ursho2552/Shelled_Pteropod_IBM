@@ -14,9 +14,6 @@ import logging
 from parcels import ErrorCode
 from tqdm import tqdm, trange
 from spIBM import population_module, parcels_module, coupler_module
-#import spIBM.population_module as population_module
-#import spIBM.parcels_module as parcels_module
-#import spIBM.coupler_module as coupler_module
 
 
 def run_ibm_idealized(
@@ -88,7 +85,7 @@ def run_ibm_idealized(
     day_start = config_param.day_start_initial_eggs
     temperature_ref = config_param.T0
     half_sat_food = config_param.Ks
-    
+
     length_t = length_t or population_module.calculate_growth_fct()
 
     tbar = trange(1,time, leave=True)
@@ -287,8 +284,8 @@ def run_ibm_coupled(
                                            temperature_ref=temperature_ref,
                                            half_sat_food=half_sat_food,
                                            day=day_vec, outfile=outfile_growth)
-            
-            
+
+
         tbar.set_description(f'Day {day_counter}: Development')
         tbar.refresh
         my_data = population_module.development(my_data,length_t)
@@ -352,7 +349,7 @@ def run_physics_only(
 
     assert dt <= 24, \
         "The sub time-step should be smaller than the model time-step (1 day)"
-        
+
     outputdt = outputdt or dt
 
     if not os.path.exists(config_param.output_dir_physics):

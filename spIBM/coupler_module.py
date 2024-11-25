@@ -12,8 +12,6 @@ from parcels import ParticleSet
 import numpy as np
 import logging
 
-
-
 def calculate_sunrise_sunset(
         lats, lons, year, current_time, rising_time=True, setting_time=False,
         local_offset=-7, backwards=False):
@@ -48,7 +46,7 @@ def calculate_sunrise_sunset(
     """
 
     #define origin time 12:05 is given by ROMS output!
-    
+
     origin = datetime.datetime(year, 1, 1) \
              + datetime.timedelta(hours=12) \
              + datetime.timedelta(minutes=5)
@@ -172,7 +170,7 @@ def prepare_particles(
     lats = pset.particle_data['lat'][:]
     lons = pset.particle_data['lon'][:]
     current_time = pset[0].time
-    
+
     sunset_seconds = calculate_sunrise_sunset(
             lats, lons, year, current_time, rising_time=0, setting_time=1,
             local_offset=-7, backwards=backwards)

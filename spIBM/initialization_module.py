@@ -274,7 +274,7 @@ def define_initial_population(
     initial_population[:,6] = 0
     #ERR
     initial_population[:,7] = np.random.uniform(
-                                low=-1, high=1, size=(number_of_individuals))
+                                low=-1, high=1, size=number_of_individuals)
     #spawned
     initial_population[:,8] = 0
     #Parent_ID
@@ -348,7 +348,7 @@ def determine_starting_day(
     cycle1 = stage_1[1:4,:]
     cycle0 = stage_0[1:4,:]
     data = np.sum(cycle1,axis=0)+np.sum(cycle0,axis=0)
-    
+
     logging.info('Matching to observations')
     best_mean,best_rolling,start_day,max_Pearson,max_Spearman,min_rmse,outside_range = match_to_observations(data,observations,observations_std,start=start)
 
@@ -455,7 +455,7 @@ def reset_particle_attributes(pset,dictionary):
     """
 
     for key in dictionary:
-        
+
         pset.particle_data[key][:] = dictionary[key]
 
     return pset
@@ -527,7 +527,7 @@ def rmse(predictions, targets):
     return np.sqrt(((predictions - targets) ** 2).mean())
 
 
-def match_to_observations(data,observations,observations_std,start=None):
+def match_to_observations(data,observations,observations_std,start=None,flag_sensitivity=None):
     """This function calculates the optimal pattern match up between the data
     from the model and obsevations data. The similarity is calculated based on
     the Pearson, Spearman correlation coefficients, the Manhattan distance, and
@@ -545,7 +545,7 @@ def match_to_observations(data,observations,observations_std,start=None):
 
     assert len(observations) == len(observations_std), \
     "The observations and the observations_std should have the same size"
-    
+
     start = start or int(data.shape[0]*2/3)
 
     std = abs(observations-observations_std)
@@ -597,5 +597,12 @@ def match_to_observations(data,observations,observations_std,start=None):
             best_mean = mean_data.copy()
             best_rolling = rolling_mean.copy()
 
-    return [best_mean, best_rolling, corrected_min_start, max_pearson,
+            best_max_value = np.nanmax(mean_data)
+            best_counter = counter
+    if flag_sensitivity is None:
+        return [best_mean, best_rolling, corrected_min_start, max_pearson,
             max_spearman, min_manhattan, min_outside_range]
+    else:
+        return [best_mean, best_rolling, corrected_min_start, max_pearson,
+            max_spearman, min_manhattan, min_outside_range, best_counter, best_max_value]
+

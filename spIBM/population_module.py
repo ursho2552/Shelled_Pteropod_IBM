@@ -87,15 +87,15 @@ def mortality(
 
     for gen in mortality_rate_dict:
         for stage in mortality_rate_dict[gen]:
-            
+
             tmp = np.squeeze(np.argwhere((pteropod_list[:,2] == int(stage))
                 & (pteropod_list[:,1]%2 == int(gen))))
-            
+
             if tmp.size == 1:
                 tmp = np.array([tmp])
 
             if tmp.size > 0:
-                
+
                 num_ind,rate = get_number_individuals(tmp,mortality_rate_dict[gen][stage])
 
                 if num_ind > 0:
@@ -369,7 +369,7 @@ def calculate_dissolution_calcification(
 
 
 def shell_growth(
-        pteropod_list, growth_fct_gen0, aragonite=4, temperature=16, food=7,
+        pteropod_list, growth_fct, aragonite=4, temperature=16, food=7,
         temperature_ref=14.5, half_sat_food=4.8, temperature_max=31,
         temperature_min=0.6, day=None,
         outfile='/cluster/scratch/ursho/output_simulation_extremes/Growth/'):
@@ -380,7 +380,7 @@ def shell_growth(
     Keyword arguments:
     pteorpod_list -- Array containing all state variables characterizing the
         pteropods
-    growth_fct_gen0 -- Shell size as function of time for spring (X=0)
+    growth_fct -- Shell size as function of time for spring (X=0)
         and winter (X=1) generation
     Arag -- Aragonite saturation state experiences by each pteropod on one day
     T -- Temperature. Default value was set to 16 to simulate optimal conditions
@@ -409,7 +409,7 @@ def shell_growth(
     if list_days_of_growth.size > 0:
 
         #get the growth rate as fraction of size increase in each time step
-        growth_rate = [(growth_fct_gen0[i]-growth_fct_gen0[i-1])/growth_fct_gen0[i-1] for i in range(1,len(growth_fct_gen0))]
+        growth_rate = [(growth_fct[i]-growth_fct[i-1])/growth_fct[i-1] for i in range(1,len(growth_fct))]
         #repeat the first at the beginning and the last one at the end
         growth_rate.insert(0,growth_rate[0])
         growth_rate.append(growth_rate[-1])
@@ -422,7 +422,7 @@ def shell_growth(
         if length.shape[0] != 1:
             length = np.squeeze(length)
         #calculate distance to reference and find index with minimum distance
-        pos_idx = np.array([np.squeeze(np.argwhere(abs(growth_fct_gen0 - i) == abs(growth_fct_gen0 - i).min())) for i in length])
+        pos_idx = np.array([np.squeeze(np.argwhere(abs(growth_fct - i) == abs(growth_fct - i).min())) for i in length])
 
         food_effect = food/(half_sat_food + food)
 
@@ -478,7 +478,7 @@ def development_dynamic(pteropod_list, stages_dictionary):
     Keyword arguments:
     pteropod_list -- Array containing all state variables characterizing the
         pteropods
-    stages_dictionary -- Dictionary containing the size thresholds for each 
+    stages_dictionary -- Dictionary containing the size thresholds for each
         life-stage. The Key should be the ID of the life stage.
 
     """
